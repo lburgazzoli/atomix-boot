@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.lburgazzoli.atomix.boot.common.SerializerCustomizer;
 import io.atomix.AtomixReplica;
+import io.atomix.catalyst.buffer.PooledHeapAllocator;
 import io.atomix.catalyst.serializer.Serializer;
 import io.atomix.catalyst.transport.Transport;
 import io.atomix.cluster.ClusterManager;
@@ -49,6 +51,8 @@ public class AtomixBootReplicaAutoConfiguration {
     private ClusterManager clusterManager;
     @Autowired(required = false)
     private Serializer serializer;
+    @Autowired(required = false)
+    private List<SerializerCustomizer> serializerCustomizers = Collections.emptyList();
 
     @ConditionalOnMissingBean(AtomixReplica.class)
     @Bean(name = "atomix-replica")
@@ -99,10 +103,20 @@ public class AtomixBootReplicaAutoConfiguration {
         Optional.ofNullable(configuration.getHeartbeatInterval()).map(Duration::ofMillis).ifPresent(builder::withHeartbeatInterval);
         Optional.ofNullable(configuration.getSessionTimeout()).map(Duration::ofMillis).ifPresent(builder::withSessionTimeout);
 
+
         // Misc
         Optional.ofNullable(configuration.getType()).ifPresent(builder::withType);
-        Optional.ofNullable(serializer).ifPresent(builder::withSerializer);
         Optional.ofNullable(clusterManager).ifPresent(builder::withClusterManager);
+
+        Serializer serializer = this.serializer;
+        if (serializer == null) {
+            serializer = new Serializer(new PooledHeapAllocator());
+        }
+        for (SerializerCustomizer customizer: serializerCustomizers) {
+            customizer.customize(serializer);
+        }
+
+        builder.withSerializer(serializer);
 
         return configuration.isBootstrap()
             ? builder.build().bootstrap(configuration.getNodes()).join()

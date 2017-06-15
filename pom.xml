@@ -131,6 +131,7 @@
   </build>
 
   <modules>
+    <module>atomix-boot-starter-common</module>
     <module>atomix-boot-starter-replica</module>
     <module>atomix-boot-node</module>
   </modules>
