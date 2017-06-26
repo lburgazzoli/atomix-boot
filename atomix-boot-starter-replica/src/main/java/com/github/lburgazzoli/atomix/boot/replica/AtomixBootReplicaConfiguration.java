@@ -130,6 +130,10 @@ public class AtomixBootReplicaConfiguration {
         return nodes;
     }
 
+    public void setNodes(List<Address> nodes) {
+        this.nodes = nodes;
+    }
+
     public Class<? extends Transport> getTransportType() {
         return transportType;
     }

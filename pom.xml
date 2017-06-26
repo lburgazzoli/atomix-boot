@@ -133,7 +133,9 @@
   <modules>
     <module>atomix-boot-starter-common</module>
     <module>atomix-boot-starter-replica</module>
+    <module>atomix-boot-starter-client</module>
     <module>atomix-boot-node</module>
+    <module>atomix-boot-examples</module>
   </modules>
 
 </project>
