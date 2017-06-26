@@ -1,0 +1,7 @@
+kind: Service
+apiVersion: v1
+spec:
+  ports:
+    - protocol: TCP
+      port: 8700
+      targetPort: 8700
