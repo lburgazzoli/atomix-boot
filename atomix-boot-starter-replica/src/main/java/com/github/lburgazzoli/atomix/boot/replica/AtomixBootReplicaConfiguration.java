@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import io.atomix.AtomixReplica;
 import io.atomix.catalyst.transport.Address;
 import io.atomix.catalyst.transport.Transport;
@@ -43,6 +45,7 @@ public class AtomixBootReplicaConfiguration {
     /**
      * The address through which clients and replicas connect to the replica
      */
+    @NotNull
     private Address address;
 
     /**
@@ -223,7 +226,7 @@ public class AtomixBootReplicaConfiguration {
         /**
          * The log storage directory.
          */
-        private File directtory;
+        private File directory;
 
         /**
          * The number of log compaction threads.
@@ -282,12 +285,12 @@ public class AtomixBootReplicaConfiguration {
             this.level = level;
         }
 
-        public File getDirecttory() {
-            return directtory;
+        public File getDirectory() {
+            return directory;
         }
 
-        public void setDirecttory(File directtory) {
-            this.directtory = directtory;
+        public void setDirectory(File directory) {
+            this.directory = directory;
         }
 
         public Integer getCompactionThreads() {

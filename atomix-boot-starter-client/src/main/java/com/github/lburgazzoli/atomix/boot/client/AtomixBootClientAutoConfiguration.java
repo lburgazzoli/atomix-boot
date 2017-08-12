@@ -30,12 +30,15 @@ import io.atomix.catalyst.serializer.Serializer;
 import io.atomix.catalyst.transport.Transport;
 import io.atomix.resource.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 @ConditionalOnClass(AtomixReplica.class)
@@ -51,8 +54,10 @@ public class AtomixBootClientAutoConfiguration {
     @Autowired(required = false)
     private List<SerializerCustomizer> serializerCustomizers = Collections.emptyList();
 
+    @Lazy
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Bean(name = "atomix-client", destroyMethod = "close")
     @ConditionalOnMissingBean(AtomixClient.class)
-    @Bean(name = "atomix-client")
     public AtomixClient atomixReplica() throws Exception {
         AtomixClient.Builder builder = AtomixClient.builder();
 

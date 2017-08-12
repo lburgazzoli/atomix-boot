@@ -31,12 +31,15 @@ import io.atomix.cluster.ClusterManager;
 import io.atomix.copycat.server.storage.Storage;
 import io.atomix.resource.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 @ConditionalOnClass(AtomixReplica.class)
@@ -54,8 +57,10 @@ public class AtomixBootReplicaAutoConfiguration {
     @Autowired(required = false)
     private List<SerializerCustomizer> serializerCustomizers = Collections.emptyList();
 
+    @Lazy
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Bean(name = "atomix-replica", destroyMethod = "shutdown")
     @ConditionalOnMissingBean(AtomixReplica.class)
-    @Bean(name = "atomix-replica")
     public AtomixReplica atomixReplica() throws Exception {
         AtomixReplica.Builder builder = AtomixReplica.builder(configuration.getAddress());
 
@@ -67,7 +72,7 @@ public class AtomixBootReplicaAutoConfiguration {
             Optional.ofNullable(storageConf.getFlushOnCommit()).ifPresent(storageBuilder::withFlushOnCommit);
             Optional.ofNullable(storageConf.getCompactionThreads()).ifPresent(storageBuilder::withCompactionThreads);
             Optional.ofNullable(storageConf.getCompactionThreshold()).ifPresent(storageBuilder::withCompactionThreshold);
-            Optional.ofNullable(storageConf.getDirecttory()).ifPresent(storageBuilder::withDirectory);
+            Optional.ofNullable(storageConf.getDirectory()).ifPresent(storageBuilder::withDirectory);
             Optional.ofNullable(storageConf.getLevel()).ifPresent(storageBuilder::withStorageLevel);
             Optional.ofNullable(storageConf.getEntryBufferSize()).ifPresent(storageBuilder::withEntryBufferSize);
             Optional.ofNullable(storageConf.getMaxSegmentSize()).ifPresent(storageBuilder::withMaxSegmentSize);
@@ -102,7 +107,6 @@ public class AtomixBootReplicaAutoConfiguration {
         Optional.ofNullable(configuration.getGlobalSuspendTimeout()).map(Duration::ofMillis).ifPresent(builder::withGlobalSuspendTimeout);
         Optional.ofNullable(configuration.getHeartbeatInterval()).map(Duration::ofMillis).ifPresent(builder::withHeartbeatInterval);
         Optional.ofNullable(configuration.getSessionTimeout()).map(Duration::ofMillis).ifPresent(builder::withSessionTimeout);
-
 
         // Misc
         Optional.ofNullable(configuration.getType()).ifPresent(builder::withType);
