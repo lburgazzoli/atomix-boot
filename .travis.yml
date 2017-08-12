@@ -1,15 +1,17 @@
 sudo: false
 
-addons:
-  apt:
-    packages:
-    - oracle-java8-installer
-
 language: java
 install: true
 
-jdk:
-  - oraclejdk8
+before_install:
+  - curl -s "https://get.sdkman.io" | bash
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk version
+  - mkdir -p "$HOME/.sdkman/etc"
+  - echo "sdkman_auto_answer=true" > "$HOME/.sdkman/etc/config"
+  - echo "sdkman_auto_selfupdate=true" > "$HOME/.sdkman/etc/config"
+  - sdk install java 8u144-zulu
+  - sdk use java 8u144-zulu
 
 script:
   - ./mvnw -s .travis-settings.xml install deploy
