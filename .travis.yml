@@ -12,6 +12,7 @@ before_install:
   - echo "sdkman_auto_selfupdate=true" > "$HOME/.sdkman/etc/config"
   - sdk install java 8u144-zulu
   - sdk use java 8u144-zulu
+  - java -version
 
 script:
   - ./mvnw -s .travis-settings.xml install deploy
