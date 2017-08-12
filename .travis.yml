@@ -18,7 +18,7 @@ script:
 notifications:
   webhooks:
     urls:
-      - $GITTER_WEBHOOK
+      - https://webhooks.gitter.im/e/dd2448518ae80084dda3
     on_success: change
     on_failure: always
     on_start: always
