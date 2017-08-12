@@ -15,6 +15,3 @@ before_install:
 script:
   - ./mvnw -s .travis-settings.xml install deploy
 
-env:
-  global:
-  - CI: true
