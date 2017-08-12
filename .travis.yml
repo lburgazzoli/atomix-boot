@@ -15,3 +15,10 @@ before_install:
 script:
   - ./mvnw -s .travis-settings.xml install deploy
 
+notifications:
+  webhooks:
+    urls:
+      - $GITTER_WEBHOOK
+    on_success: change
+    on_failure: always
+    on_start: always
