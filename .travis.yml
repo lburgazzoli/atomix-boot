@@ -1,6 +1,4 @@
 sudo: false
-
-language: java
 install: true
 
 before_install:
