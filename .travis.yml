@@ -1,0 +1,19 @@
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+
+language: java
+install: true
+
+jdk:
+  - oraclejdk8
+
+script:
+  - ./mvnw -s .travis-settings.xml install deploy
+
+env:
+  global:
+  - CI: true

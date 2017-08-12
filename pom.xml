@@ -29,6 +29,8 @@
   <version>1.0.0-SNAPSHOT</version>
   <name>atomix-boot</name>
   <packaging>pom</packaging>
+  <description>atomix-boot</description>
+  <url>https://github.com/lburgazzoli/atomix-boot</url>
 
   <licenses>
     <license>
@@ -37,22 +39,44 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <name>Luca Burgazzoli</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:lburgazzoli/atomix-boot.git</connection>
+    <developerConnection>scm:git:git@github.com:lburgazzoli/atomix-boot.git</developerConnection>
+    <url>https://github.com/lburgazzoli/atomix-boot.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>    
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- plugins -->
-    <version.maven.compiler.plugin>3.6.0</version.maven.compiler.plugin>
+    <version.maven.compiler.plugin>3.6.1</version.maven.compiler.plugin>
     <version.maven.surefire.plugin>2.19.1</version.maven.surefire.plugin>
     <version.fabric8.maven.plugin>3.4-SNAPSHOT</version.fabric8.maven.plugin>
-    
+    <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
+    <version.nexus-staging-maven-plugin>1.6.7</version.nexus-staging-maven-plugin>
+    <version.maven-release-plugin>2.5.3</version.maven-release-plugin>
+    <version.maven-source-plugin>3.0.1</version.maven-source-plugin>
+    <version.maven-javadoc-plugin>2.10.4</version.maven-javadoc-plugin>
+    <version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
+
     <!-- deps -->
-    <version.commons.lang>3.5</version.commons.lang>
-    <version.spring.boot>1.5.4.RELEASE</version.spring.boot>
+    <version.commons.lang>3.6</version.commons.lang>
+    <version.spring.boot>1.5.6.RELEASE</version.spring.boot>
     <version.junit>4.12</version.junit>
-    <version.snakeyaml>1.17</version.snakeyaml>
+    <version.snakeyaml>1.18</version.snakeyaml>
     <version.atomix>1.0.8</version.atomix>
     <version.atomix.catalyst>1.2.1</version.atomix.catalyst>
+    <version.validation.api>2.0.0.Final</version.validation.api>
+    <version.hybernate.validator>6.0.1.Final</version.hybernate.validator>
+    <version.assertj>3.8.0</version.assertj>
 
     <!-- java -->
     <version.java>1.8</version.java>
@@ -67,6 +91,12 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>${version.snakeyaml}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>${version.validation.api}</version>
     </dependency>
 
     <!-- spring boot -->
@@ -111,22 +141,62 @@
       <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${version.assertj}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${version.hybernate.validator}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${version.spring.boot}</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${version.maven.compiler.plugin}</version>
-        <configuration>
-          <source>${version.java}</source>
-          <target>${version.java}</target>
-          <encoding>UTF-8</encoding>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${version.maven.compiler.plugin}</version>
+          <configuration>
+            <source>${version.java}</source>
+            <target>${version.java}</target>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${version.maven-release-plugin}</version>
+          <configuration>
+            <useReleaseProfile>false</useReleaseProfile>
+            <releaseProfiles>release</releaseProfiles>
+            <goals>deploy</goals>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${version.maven-deploy-plugin}</version>
+          <configuration>
+            <deployAtEnd>true</deployAtEnd>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
   </build>
 
@@ -137,5 +207,90 @@
     <module>atomix-boot-node</module>
     <module>atomix-boot-examples</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation><build>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${version.maven-source-plugin}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${version.maven-javadoc-plugin}</version>
+          <configuration>
+            <aggregate>true</aggregate>
+            <encoding>UTF-8</encoding>
+            <excludePackageNames>*.protobuf.*</excludePackageNames>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${version.maven-gpg-plugin}</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>${version.nexus-staging-maven-plugin}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+
+    </profile>
+  </profiles>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
 </project>
