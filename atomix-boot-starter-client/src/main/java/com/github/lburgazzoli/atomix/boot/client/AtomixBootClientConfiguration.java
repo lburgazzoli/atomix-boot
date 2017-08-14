@@ -18,14 +18,15 @@ package com.github.lburgazzoli.atomix.boot.client;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotEmpty;
 
 import io.atomix.catalyst.transport.Address;
 import io.atomix.catalyst.transport.Transport;
 import io.atomix.resource.Resource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties("atomix.client")
 public class AtomixBootClientConfiguration {
     /**

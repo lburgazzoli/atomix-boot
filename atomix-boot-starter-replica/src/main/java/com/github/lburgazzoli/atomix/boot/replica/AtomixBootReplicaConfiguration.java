@@ -19,7 +19,6 @@ package com.github.lburgazzoli.atomix.boot.replica;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import io.atomix.AtomixReplica;
@@ -29,7 +28,9 @@ import io.atomix.copycat.server.storage.StorageLevel;
 import io.atomix.resource.Resource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties("atomix.replica")
 public class AtomixBootReplicaConfiguration {
     /**
