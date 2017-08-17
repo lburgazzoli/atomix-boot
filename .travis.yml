@@ -17,6 +17,5 @@ script:
   - ./mvnw -s .travis-settings.xml install deploy
 
 after_success:
-  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-common/target/site/jacoco/jacoco.xml
-  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-replica/target/site/jacoco/jacoco.xml
-  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-client/target/site/jacoco/jacoco.xml
+  - ./mvnw -pl atomix-boot-starter-replica com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml
+  - ./mvnw -pl atomix-boot-starter-client  com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml
