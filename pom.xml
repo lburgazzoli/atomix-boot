@@ -63,6 +63,10 @@
     <version.maven-javadoc-plugin>2.10.4</version.maven-javadoc-plugin>
     <version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
     <version.jacoco-maven-plugin>0.7.9</version.jacoco-maven-plugin>
+    <version.maven-checkstyle-plugin>2.17</version.maven-checkstyle-plugin>
+    <version.com-puppycrawl-tools>8.1</version.com-puppycrawl-tools>
+    <version.com-puppycrawl-tools-guava>22.0</version.com-puppycrawl-tools-guava>
+    <version.maven-pmd-plugin>3.8</version.maven-pmd-plugin>
 
     <!-- deps -->
     <version.commons.lang>3.6</version.commons.lang>
@@ -197,10 +201,80 @@
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${version.jacoco-maven-plugin}</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${version.maven-checkstyle-plugin}</version>
+          <dependencies>
+              <dependency>
+                  <groupId>com.puppycrawl.tools</groupId>
+                  <artifactId>checkstyle</artifactId>
+                  <version>${version.com-puppycrawl-tools}</version>
+              </dependency>
+              <dependency>
+                  <groupId>com.google.guava</groupId>
+                  <artifactId>guava</artifactId>
+                  <version>${version.com-puppycrawl-tools-guava}</version>
+              </dependency>
+          </dependencies>
+          <executions>
+              <execution>
+                  <id>validate</id>
+                  <phase>validate</phase>
+                  <goals>
+                      <goal>check</goal>
+                  </goals>
+              </execution>
+          </executions>
+
+          <configuration>
+              <!-- use custom google_checks.xml -->
+              <configLocation>../etc/checkstyle.xml</configLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <!-- enabling this after refactoring of making coding style consistent -->
+              <failOnViolation>true</failOnViolation>
+              <violationSeverity>warning</violationSeverity>
+
+              <format>xml</format>
+              <format>html</format>
+              <outputFile>target/checkstyle-errors.xml</outputFile>
+              <linkXRef>false</linkXRef>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${version.maven-pmd-plugin}</version>
+          <executions>
+            <execution>
+              <phase>test</phase>
+              <goals>
+                <goal>check</goal>
+                <goal>cpd-check</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <skip>false</skip>
+            <rulesets>
+              <ruleset>../etc/pmd-ruleset.xml</ruleset>
+            </rulesets>
+            <linkXRef>false</linkXRef>
+            <excludeRoots>
+              <excludeRoot>target/generated-sources</excludeRoot>
+            </excludeRoots>
+            <printFailingErrors>true</printFailingErrors>
+            <skipEmptyReport>false</skipEmptyReport>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
   </build>
+
 
   <modules>
     <module>atomix-boot-starter-common</module>
