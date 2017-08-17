@@ -8,7 +8,7 @@ before_install:
   - sdk version
   - mkdir -p "$HOME/.sdkman/etc"
   - echo "sdkman_auto_answer=true" > "$HOME/.sdkman/etc/config"
-  - echo "sdkman_auto_selfupdate=true" > "$HOME/.sdkman/etc/config"
+  - echo "sdkman_auto_selfupdate=true" >> "$HOME/.sdkman/etc/config"
   - sdk install java 8u144-zulu
   - sdk use java 8u144-zulu
   - java -version
