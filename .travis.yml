@@ -3,8 +3,6 @@ install: true
 language: java
 
 before_install:
-  - wget -O ~/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 
-  - chmod u+x ~/jq
   - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | ~/jq -r .assets[0].browser_download_url)
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
@@ -20,6 +18,6 @@ script:
   - ./mvnw -s .travis-settings.xml install deploy
 
 after_success:
-  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r atomix-boot-starter-common/target/site/jacoco/jacoco.xml
-  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r atomix-boot-starter-replica/target/site/jacoco/jacoco.xml
-  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r atomix-boot-starter-client/target/site/jacoco/jacoco.xml
+  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-common/target/site/jacoco/jacoco.xml
+  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-replica/target/site/jacoco/jacoco.xml
+  - ./mvnw com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=atomix-boot-starter-client/target/site/jacoco/jacoco.xml
