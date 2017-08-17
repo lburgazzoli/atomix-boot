@@ -61,7 +61,7 @@ public class AtomixBootReplicaAutoConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-replica", destroyMethod = "shutdown")
     @ConditionalOnMissingBean(AtomixReplica.class)
-    public AtomixReplica atomixReplica() throws Exception {
+    public AtomixReplica atomixReplica() throws IllegalAccessException, InstantiationException {
         AtomixReplica.Builder builder = AtomixReplica.builder(configuration.getAddress());
 
         // Storage

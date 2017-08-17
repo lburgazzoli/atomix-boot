@@ -17,11 +17,11 @@ public class ClientListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientListener.class);
 
     @Autowired
-    AtomixClient client;
+    private AtomixClient client;
     @Value("${pod.namespace}")
-    String groupName;
+    private String groupName;
     @Value("${pod.name}")
-    String memberName;
+    private String memberName;
 
     private LocalMember member;
 
