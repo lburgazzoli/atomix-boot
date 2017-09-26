@@ -38,7 +38,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
@@ -57,10 +56,9 @@ public class AtomixBootReplicaAutoConfiguration {
     @Autowired(required = false)
     private List<SerializerCustomizer> serializerCustomizers = Collections.emptyList();
 
-    @Lazy
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-replica", destroyMethod = "shutdown")
-    @ConditionalOnMissingBean(AtomixReplica.class)
+    @ConditionalOnMissingBean
     public AtomixReplica atomixReplica() throws IllegalAccessException, InstantiationException {
         AtomixReplica.Builder builder = AtomixReplica.builder(configuration.getAddress());
 

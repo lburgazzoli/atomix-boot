@@ -37,7 +37,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
@@ -54,10 +53,9 @@ public class AtomixBootClientAutoConfiguration {
     @Autowired(required = false)
     private List<SerializerCustomizer> serializerCustomizers = Collections.emptyList();
 
-    @Lazy
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-client", destroyMethod = "close")
-    @ConditionalOnMissingBean(AtomixClient.class)
+    @ConditionalOnMissingBean
     public AtomixClient atomixReplica() throws Exception {
         AtomixClient.Builder builder = AtomixClient.builder();
 

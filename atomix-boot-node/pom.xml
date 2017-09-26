@@ -16,6 +16,11 @@
       <artifactId>atomix-boot-starter-replica</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${version.hybernate.validator}</version>
+    </dependency>
   </dependencies>
 
   <build>
