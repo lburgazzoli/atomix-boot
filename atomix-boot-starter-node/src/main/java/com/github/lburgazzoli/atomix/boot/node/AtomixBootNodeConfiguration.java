@@ -16,7 +16,6 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,12 +34,13 @@ public class AtomixBootNodeConfiguration {
 
     private String endpoint;
 
-    private List<String> nodes = Collections.emptyList();
-
     private String clusterName;
 
     @NestedConfigurationProperty
-    private Storage storage;
+    private Service service = new Service();
+
+    @NestedConfigurationProperty
+    private Storage storage = new Storage();
 
     // ****************************************
     // Properties
@@ -53,7 +53,6 @@ public class AtomixBootNodeConfiguration {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
 
     public String getNodeId() {
         return nodeId;
@@ -71,14 +70,6 @@ public class AtomixBootNodeConfiguration {
         this.endpoint = endpoint;
     }
 
-    public List<String> getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(List<String> nodes) {
-        this.nodes = nodes;
-    }
-
     public String getClusterName() {
         return clusterName;
     }
@@ -87,8 +78,8 @@ public class AtomixBootNodeConfiguration {
         this.clusterName = clusterName;
     }
 
-    public void setStorage(Storage storage) {
-        this.storage = storage;
+    public Service getService() {
+        return service;
     }
 
     public Storage getStorage() {
@@ -108,6 +99,28 @@ public class AtomixBootNodeConfiguration {
 
         public void setPath(String path) {
             this.path = path;
+        }
+    }
+
+    public static class Service {
+        private String name;
+
+        private List<String> nodes;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public List<String> getNodes() {
+            return nodes;
+        }
+
+        public void setNodes(List<String> nodes) {
+            this.nodes = nodes;
         }
     }
 }

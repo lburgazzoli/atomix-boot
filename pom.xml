@@ -70,6 +70,7 @@
     <!-- deps -->
     <version.commons.lang>3.6</version.commons.lang>
     <version.spring.boot>2.0.1.RELEASE</version.spring.boot>
+    <version.spring.cloud>2.0.0.M9</version.spring.cloud>
     <version.junit.platform>1.2.0-M1</version.junit.platform>
     <version.junit.jupiter>5.2.0-M1</version.junit.jupiter>
     <version.snakeyaml>1.21</version.snakeyaml>
@@ -98,6 +99,11 @@
       <artifactId>validation-api</artifactId>
       <version>${version.validation.api}</version>
     </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${version.hybernate.validator}</version>
+    </dependency>
 
     <!-- spring boot -->
     <dependency>
@@ -115,6 +121,11 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <version>${version.spring.boot}</version>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-commons</artifactId>
+      <version>${version.spring.cloud}</version>
     </dependency>
 
     <!-- atomix -->
@@ -153,12 +164,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.hibernate.validator</groupId>
-      <artifactId>hibernate-validator</artifactId>
-      <version>${version.hybernate.validator}</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -368,5 +373,16 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/libs-milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>
