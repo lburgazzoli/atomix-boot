@@ -9,13 +9,13 @@ before_install:
   - mkdir -p "$HOME/.sdkman/etc"
   - echo "sdkman_auto_answer=true" > "$HOME/.sdkman/etc/config"
   - echo "sdkman_auto_selfupdate=true" >> "$HOME/.sdkman/etc/config"
-  - sdk install java 8u144-zulu
-  - sdk use java 8u144-zulu
+  - sdk install java 8.0.163-zulu
+  - sdk use java 8.0.163-zulu
   - java -version
 
 script:
   - ./mvnw -s .travis-settings.xml install deploy
 
 after_success:
-  - ./mvnw -pl atomix-boot-starter-replica com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml
+  - ./mvnw -pl atomix-boot-starter-node com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml
   - ./mvnw -pl atomix-boot-starter-client  com.gavinmogan:codacy-maven-plugin:coverage -DcoverageReportFile=target/site/jacoco/jacoco.xml
