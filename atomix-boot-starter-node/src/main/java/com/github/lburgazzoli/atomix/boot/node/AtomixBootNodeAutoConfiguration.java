@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.client;
+package com.github.lburgazzoli.atomix.boot.node;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,22 +37,30 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @ConditionalOnClass(name = "io.atomix.core.Atomix")
-@ConditionalOnProperty(value = "atomix.client.enabled", matchIfMissing = true)
-@EnableConfigurationProperties(AtomixBootClientConfiguration.class)
-public class AtomixBootClientAutoConfiguration {
+@ConditionalOnProperty(value = "atomix.node.enabled", matchIfMissing = true)
+@EnableConfigurationProperties(AtomixBootNodeConfiguration.class)
+public class AtomixBootNodeAutoConfiguration {
     @Autowired
-    private AtomixBootClientConfiguration configuration;
+    private AtomixBootNodeConfiguration configuration;
 
     @Lazy
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
+    @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(Atomix.class)
-    public Atomix atomixClient() throws Exception {
+    public Atomix atomixNode() {
         Atomix.Builder builder = Atomix.builder();
 
-        Node.Builder nodeBuilder = Node.builder().withType(Node.Type.CLIENT);
+        Node.Builder nodeBuilder = Node.builder().withType(Node.Type.DATA);
         if (configuration.getNodeId() != null) {
             nodeBuilder.withId(NodeId.from(configuration.getNodeId()));
+        }
+        if (configuration.getClusterName() != null) {
+            builder.withClusterName(configuration.getClusterName());
+        }
+        if (configuration.getStorage() != null) {
+            if (configuration.getStorage().getPath() != null) {
+                builder.withDataDirectory(new File(configuration.getStorage().getPath()));
+            }
         }
 
         AtomixUtil.asEndpoint(configuration.getEndpoint()).ifPresent(nodeBuilder::withEndpoint);

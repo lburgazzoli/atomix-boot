@@ -19,11 +19,14 @@ package com.github.lburgazzoli.atomix.boot.client;
 import java.util.Properties;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.boot.Banner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+
+@Disabled
 public class AtomixBootReplicaAutoConfigurationTest {
 
     @Test

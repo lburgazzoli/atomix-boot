@@ -3,47 +3,33 @@ package com.github.lburgazzoli.atomix.boot.examples.listener;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import io.atomix.AtomixClient;
-import io.atomix.group.DistributedGroup;
-import io.atomix.group.LocalMember;
+import io.atomix.cluster.ClusterEvent;
+import io.atomix.cluster.ClusterEventListener;
+import io.atomix.core.Atomix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class ClientListener {
+@Service
+public class ClientListener implements ClusterEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientListener.class);
 
     @Autowired
-    private AtomixClient client;
-    @Value("${pod.namespace}")
-    private String groupName;
-    @Value("${pod.name}")
-    private String memberName;
-
-    private LocalMember member;
+    private Atomix atomix;
 
     @PostConstruct
     public void initialize() {
-        LOGGER.info("Getting group '{}'", groupName);
-        DistributedGroup group = client.getGroup(groupName).join();
-
-        LOGGER.info("Joining group '{}' as '{}'", groupName, memberName);
-        member = group.join(memberName).join();
-
-        LOGGER.info("Listen join event");
-        group.onJoin(m -> LOGGER.info("Member join '{}", m));
-
-        LOGGER.info("Listen leave event");
-        group.onLeave(m -> LOGGER.info("Member left '{}'", m));
+        atomix.clusterService().addListener(this);
     }
 
     @PreDestroy
     public void cleanup() {
-        if (member != null) {
-            member.leave().join();
-        }
+        atomix.clusterService().removeListener(this);
+    }
+
+    @Override
+    public void onEvent(ClusterEvent event) {
+        LOGGER.info("onEvent: type={}, subject={}", event.type(), event.subject());
     }
 }

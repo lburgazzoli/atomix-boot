@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.client;
+package com.github.lburgazzoli.atomix.boot.node;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties("atomix.client")
-public class AtomixBootClientConfiguration {
+@ConfigurationProperties("atomix.node")
+public class AtomixBootNodeConfiguration {
     /**
      * Enable the replica auto configuration.
      */
@@ -36,6 +37,15 @@ public class AtomixBootClientConfiguration {
 
     private List<String> nodes = Collections.emptyList();
 
+    private String clusterName;
+
+    @NestedConfigurationProperty
+    private Storage storage;
+
+    // ****************************************
+    // Properties
+    // ****************************************
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -43,6 +53,7 @@ public class AtomixBootClientConfiguration {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
 
     public String getNodeId() {
         return nodeId;
@@ -66,5 +77,37 @@ public class AtomixBootClientConfiguration {
 
     public void setNodes(List<String> nodes) {
         this.nodes = nodes;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
+    public void setStorage(Storage storage) {
+        this.storage = storage;
+    }
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    // ****************************************
+    // Nested config
+    // ****************************************
+
+    public static class Storage {
+        private String path;
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
     }
 }

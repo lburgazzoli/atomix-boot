@@ -16,9 +16,24 @@
  */
 package com.github.lburgazzoli.atomix.boot.common;
 
-import io.atomix.catalyst.serializer.Serializer;
+import java.util.Optional;
 
-@FunctionalInterface
-public interface SerializerCustomizer {
-    void customize(Serializer serializer);
+import io.atomix.messaging.Endpoint;
+
+public final class AtomixUtil {
+    private AtomixUtil() {
+    }
+
+    public static Optional<Endpoint> asEndpoint(String address) {
+        if (address == null) {
+            return Optional.empty();
+        }
+
+        String[] items = address.split(":");
+        if (items.length == 2) {
+            return Optional.of(Endpoint.from(items[0], Integer.valueOf(items[1])));
+        }
+
+        return Optional.empty();
+    }
 }

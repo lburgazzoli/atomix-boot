@@ -50,9 +50,6 @@
     <!-- http://checkstyle.sourceforge.net/config_annotation.html -->
     <module name="SuppressWarningsHolder" />
 
-    <!-- http://checkstyle.sourceforge.net/config_filters.html -->
-    <module name="FileContentsHolder"/>
-
     <!-- Checks for blocks. You know, those {}'s         -->
     <!-- See http://checkstyle.sf.net/config_blocks.html -->
     <module name="NeedBraces"/>

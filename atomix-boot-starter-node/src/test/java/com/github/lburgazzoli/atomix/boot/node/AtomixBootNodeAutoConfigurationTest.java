@@ -14,22 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.replica;
+package com.github.lburgazzoli.atomix.boot.node;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
-import io.atomix.AtomixReplica;
-import io.atomix.catalyst.transport.Address;
-import io.atomix.copycat.server.storage.StorageLevel;
+import io.atomix.core.Atomix;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.boot.Banner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
 
-public class AtomixBootReplicaAutoConfigurationTest {
+@Disabled
+public class AtomixBootNodeAutoConfigurationTest {
 
     @Test
     public void testValidationFailure() {
@@ -40,7 +43,7 @@ public class AtomixBootReplicaAutoConfigurationTest {
         Assertions.assertThatThrownBy(
             () -> new SpringApplicationBuilder()
                 .properties(properties)
-                .sources(AtomixBootReplicaAutoConfiguration.class)
+                .sources(AtomixBootNodeAutoConfiguration.class)
                 .run()
         ).hasMessageContaining(
             "Field error in object 'atomix.replica' on field 'address': rejected value [null]"
@@ -50,27 +53,31 @@ public class AtomixBootReplicaAutoConfigurationTest {
     }
 
     @Test
-    public void testReplica() {
+    public void testReplica() throws IOException {
+        final Path tmp = Files.createTempDirectory("path");
+
         Properties properties = new Properties();
         properties.put("debug", false);
         properties.put("spring.main.banner-mode", Banner.Mode.OFF);
-        properties.put("atomix.replica.address", new Address("localhost", SocketUtils.findAvailableTcpPort()));
-        properties.put("atomix.replica.storage.level", StorageLevel.MEMORY);
+        properties.put("atomix.replica.address", "localhost:" + SocketUtils.findAvailableTcpPort());
+        properties.put("atomix.replica.storage.path", tmp.toFile().getAbsolutePath());
 
         ConfigurableApplicationContext context = null;
 
         try {
             context = new SpringApplicationBuilder()
                 .properties(properties)
-                .sources(AtomixBootReplicaAutoConfiguration.class)
+                .sources(AtomixBootNodeAutoConfiguration.class)
                 .run();
 
             Assertions.assertThat(context).isNotNull();
-            Assertions.assertThat(context.getBean(AtomixReplica.class)).isNotNull();
+            Assertions.assertThat(context.getBean(Atomix.class)).isNotNull();
         } finally {
             if (context != null) {
                 context.close();
             }
+
+            Files.delete(tmp);
         }
     }
 }
