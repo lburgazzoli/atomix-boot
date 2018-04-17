@@ -18,6 +18,9 @@ package com.github.lburgazzoli.atomix.boot.node;
 
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
@@ -32,13 +35,14 @@ public class AtomixBootNodeConfiguration {
 
     private String nodeId;
 
+    @NotNull
     private String endpoint;
 
-    private String clusterName;
-
+    @Valid
     @NestedConfigurationProperty
     private Service service = new Service();
 
+    @Valid
     @NestedConfigurationProperty
     private Storage storage = new Storage();
 
@@ -68,14 +72,6 @@ public class AtomixBootNodeConfiguration {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
-    }
-
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
     }
 
     public Service getService() {

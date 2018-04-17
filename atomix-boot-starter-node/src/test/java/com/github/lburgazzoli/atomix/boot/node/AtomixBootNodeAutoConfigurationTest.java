@@ -19,65 +19,53 @@ package com.github.lburgazzoli.atomix.boot.node;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
-import io.atomix.core.Atomix;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.boot.Banner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.SocketUtils;
 
-@Disabled
 public class AtomixBootNodeAutoConfigurationTest {
 
     @Test
     public void testValidationFailure() {
-        Properties properties = new Properties();
-        properties.put("debug", false);
-        properties.put("spring.main.banner-mode", Banner.Mode.OFF);
-
-        Assertions.assertThatThrownBy(
-            () -> new SpringApplicationBuilder()
-                .properties(properties)
-                .sources(AtomixBootNodeAutoConfiguration.class)
-                .run()
-        ).hasMessageContaining(
-            "Field error in object 'atomix.replica' on field 'address': rejected value [null]"
-        ).isInstanceOf(
-            UnsatisfiedDependencyException.class
-        );
+        new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(AtomixBootNodeAutoConfiguration.class))
+            .withPropertyValues(
+                "debug=false",
+                "spring.main.banner-mode=off")
+            .run(
+                context -> {
+                    Assertions.assertThat(context).isNotNull();
+                    Assertions.assertThat(context).getFailure().isInstanceOf(UnsatisfiedDependencyException.class);
+                }
+            );
     }
 
     @Test
-    public void testReplica() throws IOException {
+    public void testNode() throws IOException {
         final Path tmp = Files.createTempDirectory("path");
 
-        Properties properties = new Properties();
-        properties.put("debug", false);
-        properties.put("spring.main.banner-mode", Banner.Mode.OFF);
-        properties.put("atomix.replica.address", "localhost:" + SocketUtils.findAvailableTcpPort());
-        properties.put("atomix.replica.storage.path", tmp.toFile().getAbsolutePath());
-
-        ConfigurableApplicationContext context = null;
-
         try {
-            context = new SpringApplicationBuilder()
-                .properties(properties)
-                .sources(AtomixBootNodeAutoConfiguration.class)
-                .run();
-
-            Assertions.assertThat(context).isNotNull();
-            Assertions.assertThat(context.getBean(Atomix.class)).isNotNull();
+            new ApplicationContextRunner()
+                .withConfiguration(
+                    AutoConfigurations.of(AtomixBootNodeAutoConfiguration.class))
+                .withPropertyValues(
+                    "debug=false",
+                    "spring.main.banner-mode=off",
+                    "atomix.node.endpoint=localhost:" + SocketUtils.findAvailableTcpPort(),
+                    "atomix.node.storage.path=" + tmp.toFile().getAbsolutePath())
+                .run(
+                    context -> {
+                        Assertions.assertThat(context).isNotNull();
+                        Assertions.assertThat(context).hasSingleBean(AtomixBootNode.class);
+                    }
+                );
         } finally {
-            if (context != null) {
-                context.close();
-            }
-
-            Files.delete(tmp);
+            FileSystemUtils.deleteRecursively(tmp);
         }
     }
 }

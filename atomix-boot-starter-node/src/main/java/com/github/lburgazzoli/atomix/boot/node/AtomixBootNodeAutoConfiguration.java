@@ -62,9 +62,6 @@ public class AtomixBootNodeAutoConfiguration {
         if (configuration.getNodeId() != null) {
             nodeBuilder.withId(NodeId.from(configuration.getNodeId()));
         }
-        if (configuration.getClusterName() != null) {
-            builder.withClusterName(configuration.getClusterName());
-        }
 
         Endpoint endpoint = AtomixUtil.asEndpoint(configuration.getEndpoint()).orElseThrow(() -> new IllegalStateException(""));
 
@@ -74,6 +71,10 @@ public class AtomixBootNodeAutoConfiguration {
 
         final AtomixBootNodeConfiguration.Service service = configuration.getService();
         final List<Node> nodes = new ArrayList();
+
+        if (service.getName() != null) {
+            builder.withClusterName(service.getName());
+        }
 
         if (discoveryClient != null && service.getName() != null) {
             discoveryClient.getInstances(service.getName()).stream()

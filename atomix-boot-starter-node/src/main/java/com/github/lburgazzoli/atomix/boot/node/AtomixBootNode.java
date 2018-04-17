@@ -26,7 +26,7 @@ import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.Lifecycle;
 
-public class AtomixBootNode implements Lifecycle {
+public final class AtomixBootNode implements Lifecycle {
     private final AtomicBoolean running;
     private final Atomix atomix;
     private final Optional<String> serviceId;
@@ -75,7 +75,7 @@ public class AtomixBootNode implements Lifecycle {
 
     @Override
     public boolean isRunning() {
-        return running.get();
+        return atomix.isRunning();
     }
 
     public Atomix node() {

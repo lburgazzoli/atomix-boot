@@ -268,9 +268,6 @@
               <!-- enabling this after refactoring of making coding style consistent -->
               <failOnViolation>true</failOnViolation>
               <violationSeverity>warning</violationSeverity>
-
-              <format>xml</format>
-              <format>html</format>
               <outputFile>target/checkstyle-errors.xml</outputFile>
               <linkXRef>false</linkXRef>
           </configuration>
@@ -285,7 +282,7 @@
     <module>atomix-boot-starter-common</module>
     <module>atomix-boot-starter-node</module>
     <module>atomix-boot-starter-client</module>
-    <module>atomix-boot-node</module>
+    <module>atomix-boot-cloud-node</module>
     <module>atomix-boot-examples</module>
   </modules>
 
@@ -317,7 +314,6 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${version.maven-javadoc-plugin}</version>
           <configuration>
-            <aggregate>true</aggregate>
             <encoding>UTF-8</encoding>
             <excludePackageNames>*.protobuf.*</excludePackageNames>
           </configuration>
