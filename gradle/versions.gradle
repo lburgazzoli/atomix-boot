@@ -1,0 +1,37 @@
+// ****************
+// Plugin deps
+// ****************
+
+apply plugin: 'com.github.ben-manes.versions'
+
+// ****************
+// Plugin conf
+// ****************
+
+dependencyUpdates.resolutionStrategy = {
+    componentSelection { rules ->
+        rules.all { ComponentSelection selection ->
+            boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'ea'].any {
+                qualifier -> 
+                    if (selection.candidate.group == 'io.atomix') {
+                        return false
+                    }
+                    if (selection.candidate.group == 'org.springframework.cloud') {
+                        return false
+                    }
+                    return selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+            }
+            if (rejected) {
+                selection.reject('Release candidate')
+            }
+        }
+    }
+}
+
+// ****************
+// Task
+// ****************
+
+task deps {
+    dependsOn dependencyUpdates
+}

@@ -1,0 +1,9 @@
+rootProject.name = 'atomix-boot'
+
+// starters
+include ':atomix-boot-starter-common'
+include ':atomix-boot-starter-node'
+include ':atomix-boot-starter-client'
+
+// cloud
+include ':atomix-cloud-node'

@@ -55,7 +55,6 @@
     <!-- plugins -->
     <version.maven.compiler.plugin>3.7.0</version.maven.compiler.plugin>
     <version.maven.surefire.plugin>2.21.0</version.maven.surefire.plugin>
-    <version.fabric8.maven.plugin>3.5.38</version.fabric8.maven.plugin>
     <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
     <version.nexus-staging-maven-plugin>1.6.8</version.nexus-staging-maven-plugin>
     <version.maven-release-plugin>2.5.3</version.maven-release-plugin>
@@ -81,9 +80,6 @@
 
     <!-- java -->
     <version.java>1.8</version.java>
-
-    <!-- fabric8 -->
-    <fabric8.deploy.createExternalUrls>true</fabric8.deploy.createExternalUrls>
   </properties>
 
   <dependencies>
@@ -283,7 +279,6 @@
     <module>atomix-boot-starter-node</module>
     <module>atomix-boot-starter-client</module>
     <module>atomix-boot-cloud-node</module>
-    <module>atomix-boot-examples</module>
   </modules>
 
   <profiles>

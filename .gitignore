@@ -27,6 +27,7 @@ logs/
 target/
 data/
 out/
+bin
 
 pom.xml.releaseBackup
 release.properties

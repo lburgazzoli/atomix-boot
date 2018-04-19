@@ -1,0 +1,9 @@
+apply plugin: "io.github.ddimtirov.codacy"
+
+codacy {
+    if(!project.hasProperty('codacyProjectToken')) {
+        projectToken = System.env.CODACY_PROJECT_TOKEN
+    } else {
+        projectToken = project.codacyProjectToken
+    }
+}

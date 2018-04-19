@@ -1,0 +1,119 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.adarshr:gradle-test-logger-plugin:1.2.0"
+    classpath "net.researchgate:gradle-release:2.7.0"
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
+    classpath "com.github.ben-manes:gradle-versions-plugin:0.17.0"
+    classpath "gradle.plugin.io.github.ddimtirov:codacy-gradle-plugin:0.1.0"
+  }
+}
+
+apply plugin: "io.codearte.nexus-staging"
+
+ext {
+    group             = 'com.github.lburgazzoli'
+    isSnapshot        = version.endsWith("-SNAPSHOT")
+    isRelease         = !isSnapshot
+    isCI              = Boolean.valueOf("$System.env.CI")
+    isPR              = "false" != System.env.TRAVIS_PULL_REQUEST
+    gitRoot           = "https://github.com/lburgazzoli"
+    gitProject        = "https://github.com/lburgazzoli/atomix-boot"
+    gitURL            = "git@github.com/lburgazzoli/atomix-boot.git"
+    ciTasks           = isRelease ? ['clean', 'test'] : (isPR ? ['clean', 'test'] : ['clean', 'test', 'uploadArchives'])
+
+    mavenDeployUrl = isSnapshot ?
+        'https://oss.sonatype.org/content/repositories/snapshots/' :
+        'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+
+    if(!project.hasProperty('nexusUsername') && !project.hasProperty('nexusPassword')) {
+        nexusUsername = "$System.env.CI_DEPLOY_USERNAME"
+        nexusPassword = "$System.env.CI_DEPLOY_PASSWORD"
+    }
+
+    versions = [
+        slf4j               : '1.7.25',
+        snakeyaml           : '1.21',
+        atomix              : '2.1.0-beta2',
+        validation_api      : '2.0.1.Final',
+        hibernate_validator : '6.0.9.Final',
+        spring_boot         : '2.0.1.RELEASE',
+        spring_cloud        : '2.0.0.M9',
+        junit_jupiter       : '5.1.1',
+        assertj             : '3.9.1',
+    ]
+}
+
+// *****************
+// Subprojects
+// *****************
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven'
+    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
+    apply plugin: 'pmd'
+    apply plugin: 'com.adarshr.test-logger'
+
+    apply from: "${rootProject.projectDir}/gradle/versions.gradle"
+    apply from: "${rootProject.projectDir}/gradle/release.gradle"
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+
+        maven {
+            url "https://repo.spring.io/libs-milestone"
+        }
+    }
+
+    compileJava   {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    dependencies {
+        api "org.slf4j:slf4j-api:$versions.slf4j"
+        api "javax.validation:validation-api:$versions.validation_api"
+
+        api "io.atomix:atomix:$versions.atomix"
+
+        api "org.springframework.boot:spring-boot-starter:$versions.spring_boot"
+        api "org.springframework.cloud:spring-cloud-commons:$versions.spring_cloud"
+
+        testImplementation "org.assertj:assertj-core:$versions.assertj"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$versions.junit_jupiter"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$versions.junit_jupiter"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    testlogger {
+        theme 'mocha'
+        showStandardStreams true
+    }
+
+    checkstyle {
+        configDir = file("${rootProject.projectDir}/etc/checkstyle")
+    }
+    
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            csv.enabled false
+            html.destination file("${buildDir}/reports/coverage")
+        }
+    }
+
+    pmd {
+        consoleOutput = true
+    }
+}
