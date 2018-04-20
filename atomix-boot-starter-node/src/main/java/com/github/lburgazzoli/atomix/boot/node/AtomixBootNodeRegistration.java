@@ -38,12 +38,12 @@ public class AtomixBootNodeRegistration implements Registration {
 
     @Override
     public String getHost() {
-        return node.endpoint().host().getHostAddress();
+        return node.address().host();
     }
 
     @Override
     public int getPort() {
-        return node.endpoint().port();
+        return node.address().port();
     }
 
     @Override

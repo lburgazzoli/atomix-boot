@@ -1,4 +1,4 @@
-apply plugin: 'signing'
+//apply plugin: 'signing'
 apply plugin: "net.researchgate.release"
 
 // **************
@@ -20,13 +20,20 @@ artifacts {
     archives javadocJar
 }
 
+/*
 signing {
     required {
-        isRelease
+        isRelease && gradle.taskGraph.hasTask("uploadArchives")
     }
 
-    sign configurations.archives
+    required {
+        //isRelease
+        false
+    }
+
+    //sign configurations.archives
 }
+*/
 
 // **************
 // Upload

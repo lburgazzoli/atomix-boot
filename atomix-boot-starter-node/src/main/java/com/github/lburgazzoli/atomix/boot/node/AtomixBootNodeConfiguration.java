@@ -16,35 +16,35 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import java.util.List;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
+import io.atomix.core.AtomixConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("atomix.node")
-public class AtomixBootNodeConfiguration {
+public class AtomixBootNodeConfiguration extends AtomixConfig {
     /**
      * Enable the replica auto configuration.
      */
     private boolean enabled = true;
 
-    private String nodeId;
-
+    /*
     @NotNull
-    private String endpoint;
+    private Node node;
 
     @Valid
     @NestedConfigurationProperty
-    private Service service = new Service();
+    private AtomixBootNodeConfiguration.Cluster cluster = new Cluster();
 
     @Valid
     @NestedConfigurationProperty
     private Storage storage = new Storage();
+    */
+
+
+    //@Valid
+    //@NestedConfigurationProperty
+    //private AtomixConfig cfg = new AtomixConfig();
 
     // ****************************************
     // Properties
@@ -58,33 +58,73 @@ public class AtomixBootNodeConfiguration {
         this.enabled = enabled;
     }
 
-    public String getNodeId() {
-        return nodeId;
+    /*
+    public Node getNode() {
+        return node;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setNode(Node node) {
+        this.node = node;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public Service getService() {
-        return service;
+    public Cluster getCluster() {
+        return cluster;
     }
 
     public Storage getStorage() {
         return storage;
     }
+    */
+
+    //public AtomixConfig getCfg() {
+    //    return cfg;
+    //}
+
+    /*
+    public void setCfg(AtomixConfig cfg) {
+        this.cfg = cfg;
+    }
+    */
 
     // ****************************************
     // Nested config
     // ****************************************
+
+    /*
+    public static class Node {
+        @Nonnull
+        public String name;
+
+        @Nonnull
+        public io.atomix.cluster.Node.Type type;
+
+        @Nonnull
+        public String address;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public io.atomix.cluster.Node.Type getType() {
+            return type;
+        }
+
+        public void setType(io.atomix.cluster.Node.Type type) {
+            this.type = type;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+    }
 
     public static class Storage {
         private String path;
@@ -98,10 +138,12 @@ public class AtomixBootNodeConfiguration {
         }
     }
 
-    public static class Service {
+    public static class Cluster {
+        @Nonnull
         private String name;
 
-        private List<String> nodes;
+        @Nonnull
+        private List<Node> nodes;
 
         public String getName() {
             return name;
@@ -111,12 +153,13 @@ public class AtomixBootNodeConfiguration {
             this.name = name;
         }
 
-        public List<String> getNodes() {
+        public List<Node> getNodes() {
             return nodes;
         }
 
-        public void setNodes(List<String> nodes) {
+        public void setNodes(List<Node> nodes) {
             this.nodes = nodes;
         }
     }
+    */
 }

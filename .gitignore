@@ -18,6 +18,8 @@ atlassian-ide-plugin.xml
 .settings/
 .idea/
 .gradle/
+.sts4-cace/
+.vscode/
 
 classes/
 build/

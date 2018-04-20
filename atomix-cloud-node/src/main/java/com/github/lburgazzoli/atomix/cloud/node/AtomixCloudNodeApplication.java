@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node;
+package com.github.lburgazzoli.atomix.cloud.node;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,8 +22,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class AtomixBootNodeApplication {
+public class AtomixCloudNodeApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AtomixBootNodeApplication.class, args);
+        SpringApplication.run(AtomixCloudNodeApplication.class, args);
     }
 }

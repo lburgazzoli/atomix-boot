@@ -16,12 +16,6 @@
  */
 package com.github.lburgazzoli.atomix.boot.client;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import com.github.lburgazzoli.atomix.boot.common.AtomixUtil;
-import io.atomix.cluster.Node;
-import io.atomix.cluster.NodeId;
 import io.atomix.core.Atomix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -47,6 +41,8 @@ public class AtomixBootClientAutoConfiguration {
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(Atomix.class)
     public Atomix atomixClient() throws Exception {
+        return Atomix.builder().build();
+        /*
         Atomix.Builder builder = Atomix.builder();
 
         Node.Builder nodeBuilder = Node.builder().withType(Node.Type.CLIENT);
@@ -65,5 +61,6 @@ public class AtomixBootClientAutoConfiguration {
         );
 
         return builder.withLocalNode(nodeBuilder.build()).build();
+        */
     }
 }

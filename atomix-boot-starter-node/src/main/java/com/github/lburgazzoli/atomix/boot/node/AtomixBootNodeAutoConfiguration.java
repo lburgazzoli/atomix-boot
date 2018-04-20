@@ -16,16 +16,11 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-import com.github.lburgazzoli.atomix.boot.common.AtomixUtil;
 import io.atomix.cluster.Node;
 import io.atomix.cluster.NodeId;
 import io.atomix.core.Atomix;
-import io.atomix.messaging.Endpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -56,49 +51,62 @@ public class AtomixBootNodeAutoConfiguration {
     @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(AtomixBootNode.class)
     public AtomixBootNode atomixNode() {
+        /*
+        Atomix.builder(configuration.getCfg());
+
         Atomix.Builder builder = Atomix.builder();
-
-        Node.Builder nodeBuilder = Node.builder().withType(Node.Type.DATA);
-        if (configuration.getNodeId() != null) {
-            nodeBuilder.withId(NodeId.from(configuration.getNodeId()));
-        }
-
-        Endpoint endpoint = AtomixUtil.asEndpoint(configuration.getEndpoint()).orElseThrow(() -> new IllegalStateException(""));
-
         if (configuration.getStorage().getPath() != null) {
             builder.withDataDirectory(new File(configuration.getStorage().getPath()));
         }
 
-        final AtomixBootNodeConfiguration.Service service = configuration.getService();
-        final List<Node> nodes = new ArrayList();
+        final AtomixBootNodeConfiguration.Cluster cluster = configuration.getCluster();
+        final List<io.atomix.cluster.Node> nodes = new ArrayList();
 
-        if (service.getName() != null) {
-            builder.withClusterName(service.getName());
+        if (cluster.getName() != null) {
+            builder.withClusterName(cluster.getName());
         }
 
-        if (discoveryClient != null && service.getName() != null) {
-            discoveryClient.getInstances(service.getName()).stream()
-                .map(s -> Endpoint.from(s.getHost(), s.getPort()))
-                .map(e -> Node.builder().withType(Node.Type.DATA).withEndpoint(e).build())
-                .forEach(nodes::add);
+        if (discoveryClient != null && cluster.getName() != null) {
+            for (ServiceInstance instance: discoveryClient.getInstances(cluster.getName())) {
+                String type = instance.getMetadata().getOrDefault("atomix.node.type", "CORE");
+                String name = instance.getMetadata().get("atomix.node.name");
+
+                Node.Builder nb = Node.builder();
+                nb.withAddress(instance.getHost(), instance.getPort());
+                nb.withType(Node.Type.valueOf(type));
+
+                if (name != null) {
+                    nb.withId(NodeId.from(name));
+                }
+
+                nodes.add(nb.build());
+            }
         }
 
-        if (service.getNodes() != null) {
-            service.getNodes().stream()
-                .map(AtomixUtil::asEndpoint)
-                .filter(Optional::isPresent)
-                .map(e -> Node.builder().withType(Node.Type.DATA).withEndpoint(e.get()).build())
-                .forEach(nodes::add);
+        for (AtomixBootNodeConfiguration.Node node : cluster.getNodes()) {
+            nodes.add(asAtomixNode(node));
         }
 
-        builder.withBootstrapNodes(nodes);
+        builder.withNodes(nodes);
+        builder.withLocalNode(asAtomixNode(configuration.getNode()));
+        */
 
         return new AtomixBootNode(
-            builder.withLocalNode(
-                nodeBuilder.withEndpoint(endpoint).build()
-            ).build(),
-            Optional.ofNullable(service.getName()),
+            Atomix.builder().build(),
+            Optional.ofNullable(null),
             Optional.ofNullable(serviceRegistry)
         );
+    }
+
+    private Node asAtomixNode(AtomixBootNodeConfiguration.Node node) {
+        Node.Builder nb = Node.builder();
+        nb.withAddress(node.getAddress());
+        nb.withType(node.getType());
+
+        if (node.getName() != null) {
+            nb.withId(NodeId.from(node.getName()));
+        }
+
+        return nb.build();
     }
 }
