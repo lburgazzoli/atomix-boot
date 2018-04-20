@@ -38,7 +38,7 @@ ext {
     versions = [
         slf4j               : '1.7.25',
         snakeyaml           : '1.21',
-        atomix              : '2.1.0-beta2',
+        atomix              : '2.1.0-beta3',
         validation_api      : '2.0.1.Final',
         hibernate_validator : '6.0.9.Final',
         spring_boot         : '2.0.1.RELEASE',
