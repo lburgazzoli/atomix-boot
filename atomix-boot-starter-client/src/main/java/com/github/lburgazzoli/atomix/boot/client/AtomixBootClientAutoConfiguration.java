@@ -17,6 +17,7 @@
 package com.github.lburgazzoli.atomix.boot.client;
 
 import io.atomix.core.Atomix;
+import io.atomix.core.AtomixConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -40,27 +41,13 @@ public class AtomixBootClientAutoConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(Atomix.class)
-    public Atomix atomixClient() throws Exception {
-        return Atomix.builder().build();
-        /*
-        Atomix.Builder builder = Atomix.builder();
+    public Atomix atomixClient() {
+        AtomixConfig config = new AtomixConfig();
+        config.setDataDirectory(configuration.getDataDirectory());
+        config.getClusterConfig().setLocalNode(configuration.getLocalNode());
+        config.getClusterConfig().setName(configuration.getCluster().getName());
+        config.getClusterConfig().setNodes(configuration.getCluster().getNodes());
 
-        Node.Builder nodeBuilder = Node.builder().withType(Node.Type.CLIENT);
-        if (configuration.getNodeId() != null) {
-            nodeBuilder.withId(NodeId.from(configuration.getNodeId()));
-        }
-
-        AtomixUtil.asEndpoint(configuration.getEndpoint()).ifPresent(nodeBuilder::withEndpoint);
-
-        builder.withBootstrapNodes(
-            configuration.getNodes().stream()
-                .map(AtomixUtil::asEndpoint)
-                .filter(Optional::isPresent)
-                .map(e -> Node.builder().withType(Node.Type.DATA).withEndpoint(e.get()).build())
-                .collect(Collectors.toList())
-        );
-
-        return builder.withLocalNode(nodeBuilder.build()).build();
-        */
+        return Atomix.builder(config).build();
     }
 }

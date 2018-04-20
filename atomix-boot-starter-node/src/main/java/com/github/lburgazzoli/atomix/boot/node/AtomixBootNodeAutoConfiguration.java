@@ -16,11 +16,13 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import io.atomix.cluster.Node;
-import io.atomix.cluster.NodeId;
 import io.atomix.core.Atomix;
+import io.atomix.core.AtomixConfig;
+import io.atomix.primitive.partition.PartitionGroupConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -36,7 +38,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @ConditionalOnClass(name = "io.atomix.core.Atomix")
-@ConditionalOnProperty(value = "atomix.node.enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "atomix.node", name = "enabled", matchIfMissing = true)
 @EnableDiscoveryClient(autoRegister=false)
 @EnableConfigurationProperties(AtomixBootNodeConfiguration.class)
 public class AtomixBootNodeAutoConfiguration {
@@ -51,62 +53,21 @@ public class AtomixBootNodeAutoConfiguration {
     @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(AtomixBootNode.class)
     public AtomixBootNode atomixNode() {
-        /*
-        Atomix.builder(configuration.getCfg());
+        AtomixConfig config = new AtomixConfig();
+        config.setDataDirectory(configuration.getDataDirectory());
+        config.getClusterConfig().setLocalNode(configuration.getLocalNode());
+        config.getClusterConfig().setName(configuration.getCluster().getName());
+        config.getClusterConfig().setNodes(configuration.getCluster().getNodes());
 
-        Atomix.Builder builder = Atomix.builder();
-        if (configuration.getStorage().getPath() != null) {
-            builder.withDataDirectory(new File(configuration.getStorage().getPath()));
-        }
+        List<PartitionGroupConfig> partitions = new ArrayList<>();
+        configuration.getPartitionGroups().getRaft().forEach(partitions::add);
 
-        final AtomixBootNodeConfiguration.Cluster cluster = configuration.getCluster();
-        final List<io.atomix.cluster.Node> nodes = new ArrayList();
-
-        if (cluster.getName() != null) {
-            builder.withClusterName(cluster.getName());
-        }
-
-        if (discoveryClient != null && cluster.getName() != null) {
-            for (ServiceInstance instance: discoveryClient.getInstances(cluster.getName())) {
-                String type = instance.getMetadata().getOrDefault("atomix.node.type", "CORE");
-                String name = instance.getMetadata().get("atomix.node.name");
-
-                Node.Builder nb = Node.builder();
-                nb.withAddress(instance.getHost(), instance.getPort());
-                nb.withType(Node.Type.valueOf(type));
-
-                if (name != null) {
-                    nb.withId(NodeId.from(name));
-                }
-
-                nodes.add(nb.build());
-            }
-        }
-
-        for (AtomixBootNodeConfiguration.Node node : cluster.getNodes()) {
-            nodes.add(asAtomixNode(node));
-        }
-
-        builder.withNodes(nodes);
-        builder.withLocalNode(asAtomixNode(configuration.getNode()));
-        */
+        config.setPartitionGroups(partitions);
 
         return new AtomixBootNode(
-            Atomix.builder().build(),
+            Atomix.builder(config).build(),
             Optional.ofNullable(null),
             Optional.ofNullable(serviceRegistry)
         );
-    }
-
-    private Node asAtomixNode(AtomixBootNodeConfiguration.Node node) {
-        Node.Builder nb = Node.builder();
-        nb.withAddress(node.getAddress());
-        nb.withType(node.getType());
-
-        if (node.getName() != null) {
-            nb.withId(NodeId.from(node.getName()));
-        }
-
-        return nb.build();
     }
 }

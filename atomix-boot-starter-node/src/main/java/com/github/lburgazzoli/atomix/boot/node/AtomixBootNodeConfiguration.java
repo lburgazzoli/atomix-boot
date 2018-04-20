@@ -16,35 +16,41 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import io.atomix.core.AtomixConfig;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+
+import io.atomix.cluster.NodeConfig;
+import io.atomix.protocols.raft.partition.RaftPartitionGroupConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("atomix.node")
-public class AtomixBootNodeConfiguration extends AtomixConfig {
-    /**
-     * Enable the replica auto configuration.
-     */
+public class AtomixBootNodeConfiguration {
     private boolean enabled = true;
 
-    /*
-    @NotNull
-    private Node node;
+    @Valid
+    @Nonnull
+    @NestedConfigurationProperty
+    private NodeConfig localNode;
+
+    @Nullable
+    private File dataDirectory;
 
     @Valid
+    @Nonnull
     @NestedConfigurationProperty
-    private AtomixBootNodeConfiguration.Cluster cluster = new Cluster();
+    private Cluster cluster;
 
     @Valid
+    @Nonnull
     @NestedConfigurationProperty
-    private Storage storage = new Storage();
-    */
-
-
-    //@Valid
-    //@NestedConfigurationProperty
-    //private AtomixConfig cfg = new AtomixConfig();
+    public PartitionsGroups partitionGroups;
 
     // ****************************************
     // Properties
@@ -58,48 +64,48 @@ public class AtomixBootNodeConfiguration extends AtomixConfig {
         this.enabled = enabled;
     }
 
-    /*
-    public Node getNode() {
-        return node;
+    public NodeConfig getLocalNode() {
+        return localNode;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setLocalNode(NodeConfig localNode) {
+        this.localNode = localNode;
     }
 
     public Cluster getCluster() {
         return cluster;
     }
 
-    public Storage getStorage() {
-        return storage;
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
     }
-    */
 
-    //public AtomixConfig getCfg() {
-    //    return cfg;
-    //}
-
-    /*
-    public void setCfg(AtomixConfig cfg) {
-        this.cfg = cfg;
+    public File getDataDirectory() {
+        return dataDirectory;
     }
-    */
+
+    public void setDataDirectory(File dataDirectory) {
+        this.dataDirectory = dataDirectory;
+    }
+
+    public PartitionsGroups getPartitionGroups() {
+        return partitionGroups;
+    }
+
+    public void setPartitionGroups(PartitionsGroups partitionGroups) {
+        this.partitionGroups = partitionGroups;
+    }
 
     // ****************************************
     // Nested config
     // ****************************************
 
-    /*
-    public static class Node {
+    public static class Cluster {
         @Nonnull
         public String name;
 
-        @Nonnull
-        public io.atomix.cluster.Node.Type type;
+        public List<NodeConfig> nodes = new ArrayList<>();
 
-        @Nonnull
-        public String address;
 
         public String getName() {
             return name;
@@ -109,57 +115,20 @@ public class AtomixBootNodeConfiguration extends AtomixConfig {
             this.name = name;
         }
 
-        public io.atomix.cluster.Node.Type getType() {
-            return type;
-        }
-
-        public void setType(io.atomix.cluster.Node.Type type) {
-            this.type = type;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-    }
-
-    public static class Storage {
-        private String path;
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
-    }
-
-    public static class Cluster {
-        @Nonnull
-        private String name;
-
-        @Nonnull
-        private List<Node> nodes;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public List<Node> getNodes() {
+        public List<NodeConfig> getNodes() {
             return nodes;
         }
 
-        public void setNodes(List<Node> nodes) {
+        public void setNodes(List<NodeConfig> nodes) {
             this.nodes = nodes;
         }
     }
-    */
+
+    public static class PartitionsGroups {
+        public List<RaftPartitionGroupConfig> raft = new ArrayList<>();
+
+        public List<RaftPartitionGroupConfig> getRaft() {
+            return raft;
+        }
+    }
 }

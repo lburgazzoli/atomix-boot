@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: atomix-boot-node
+
+management:
+  endpoints:
+    enabled-by-default: false
+    health:
+      enabled: true
+
+logging:
+  level:
+    io.atomix: INFO
+    com.github.lburgazzoli.atomix: DEBUG
+
+atomix:
+  node:
+    data-directory: ${java.io.tmpdir}/${atomix.node.local-node.id}
+    local-node:
+      id: ${spring.application.name}-${random.uuid}
+      type: core
+      address: ${node.ip:localhost}:${node.port:8700}
+    cluster:
+      name: ${spring.application.name}
+    partition-groups:
+      raft:
+        - name: raft
+          partitions: 3
+          partition-size: 3

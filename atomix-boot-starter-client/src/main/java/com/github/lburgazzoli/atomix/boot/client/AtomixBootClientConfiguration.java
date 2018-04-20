@@ -16,25 +16,39 @@
  */
 package com.github.lburgazzoli.atomix.boot.client;
 
-import java.util.Collections;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
 
+import io.atomix.cluster.NodeConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("atomix.client")
 public class AtomixBootClientConfiguration {
-    /**
-     * Enable the replica auto configuration.
-     */
     private boolean enabled = true;
 
-    private String nodeId;
+    @Valid
+    @Nonnull
+    @NestedConfigurationProperty
+    private NodeConfig localNode;
 
-    private String endpoint;
+    @Nullable
+    private File dataDirectory;
 
-    private List<String> nodes = Collections.emptyList();
+    @Valid
+    @Nonnull
+    @NestedConfigurationProperty
+    private Cluster cluster;
+
+    // ****************************************
+    // Properties
+    // ****************************************
 
     public boolean isEnabled() {
         return enabled;
@@ -44,27 +58,55 @@ public class AtomixBootClientConfiguration {
         this.enabled = enabled;
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public NodeConfig getLocalNode() {
+        return localNode;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setLocalNode(NodeConfig localNode) {
+        this.localNode = localNode;
     }
 
-    public String getEndpoint() {
-        return endpoint;
+    public Cluster getCluster() {
+        return cluster;
     }
 
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
     }
 
-    public List<String> getNodes() {
-        return nodes;
+    public File getDataDirectory() {
+        return dataDirectory;
     }
 
-    public void setNodes(List<String> nodes) {
-        this.nodes = nodes;
+    public void setDataDirectory(File dataDirectory) {
+        this.dataDirectory = dataDirectory;
+    }
+
+    // ****************************************
+    // Nested config
+    // ****************************************
+
+    public static class Cluster {
+        @Nonnull
+        public String name;
+
+        public List<NodeConfig> nodes = new ArrayList<>();
+
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public List<NodeConfig> getNodes() {
+            return nodes;
+        }
+
+        public void setNodes(List<NodeConfig> nodes) {
+            this.nodes = nodes;
+        }
     }
 }
