@@ -22,18 +22,26 @@ import java.util.Map;
 import io.atomix.cluster.Node;
 
 public final class AtomixBootUtils {
+    public static final String META_NODE_ID = "atomix.node.id";
+    public static final String META_NODE_TYPE = "atomix.node.type";
+    public static final String META_NODE_ZONE = "atomix.node.zone";
+    public static final String META_NODE_RACK = "atomix.node.rack";
+    public static final String META_NODE_HOST = "atomix.node.host";
+    public static final String META_NODE_ADDRESS_HOST = "atomix.node.address.host";
+    public static final String META_NODE_ADDRESS_PORT = "atomix.node.address.port";
+
     private AtomixBootUtils() {
     }
 
     public static  Map<String, String>  getMeta(Node node) {
         Map<String, String> meta = new HashMap<>();
-        meta.put("atomix.node.address.host", node.address().host());
-        meta.put("atomix.node.address.port", Integer.toString(node.address().port()));
-        meta.put("atomix.node.host", node.host());
-        meta.put("atomix.node.rack", node.rack());
-        meta.put("atomix.node.zone", node.zone());
-        meta.put("atomix.node.type", node.type().name());
-        meta.put("atomix.node.id", node.id().id());
+        meta.put(META_NODE_ADDRESS_HOST, node.address().host());
+        meta.put(META_NODE_ADDRESS_PORT, Integer.toString(node.address().port()));
+        meta.put(META_NODE_HOST, node.host());
+        meta.put(META_NODE_RACK, node.rack());
+        meta.put(META_NODE_ZONE, node.zone());
+        meta.put(META_NODE_TYPE, node.type().name());
+        meta.put(META_NODE_ID, node.id().id());
 
         return meta;
     }

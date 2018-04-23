@@ -45,12 +45,12 @@ public final class AtomixBootNode implements Lifecycle {
     public void start() {
         if (running.compareAndSet(false, true)) {
             atomix.start().thenAccept(
-                a ->  {
+                a -> {
                     if (!serviceId.isPresent() || !serviceRegistry.isPresent()) {
                         return;
                     }
 
-                    final Node node = a.clusterService().getLocalNode();
+                    final Node node = atomix.clusterService().getLocalNode();
                     final Registration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
 
                     serviceRegistration.set(registration);

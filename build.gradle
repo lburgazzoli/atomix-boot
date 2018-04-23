@@ -45,6 +45,7 @@ ext {
         hibernate_validator : '6.0.9.Final',
         spring_boot         : '2.0.1.RELEASE',
         spring_cloud        : '2.0.0.M9',
+        spring_consul       : '2.0.0.M7',
         junit_jupiter       : '5.1.1',
         assertj             : '3.9.1',
     ]

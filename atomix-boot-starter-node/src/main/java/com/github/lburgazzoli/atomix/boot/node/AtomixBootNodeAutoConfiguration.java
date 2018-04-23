@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
 import io.atomix.cluster.Node;
 import io.atomix.cluster.NodeConfig;
 import io.atomix.core.Atomix;
@@ -66,8 +67,8 @@ public class AtomixBootNodeAutoConfiguration {
         // then use DiscoveryClient to discovery additional nodes
         if (discoveryClient != null && clusterName != null) {
             for (ServiceInstance instance: discoveryClient.getInstances(clusterName)) {
-                String type = instance.getMetadata().getOrDefault("atomix.node.type", "CORE");
-                String id = instance.getMetadata().get("atomix.node.id");
+                String type = instance.getMetadata().getOrDefault(AtomixBootUtils.META_NODE_TYPE, "CORE");
+                String id = instance.getMetadata().get(AtomixBootUtils.META_NODE_ID);
 
                 NodeConfig nodeConfig = new NodeConfig();
                 nodeConfig.setAddress(Address.from(instance.getHost(), instance.getPort()));

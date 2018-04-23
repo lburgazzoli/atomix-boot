@@ -1,6 +1,16 @@
 spring:
   application:
     name: atomix-boot-node
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        enabled: true
+        #health-check-path: ${management.context-path}/health
+        #health-check-interval: 15s
+      registration:
+        enabled: true
 
 management:
   endpoints:
