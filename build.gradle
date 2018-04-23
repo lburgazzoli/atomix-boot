@@ -1,17 +1,18 @@
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
-  }
-  dependencies {
-    classpath "com.adarshr:gradle-test-logger-plugin:1.2.0"
-    classpath "net.researchgate:gradle-release:2.7.0"
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
-    classpath "com.github.ben-manes:gradle-versions-plugin:0.17.0"
-    classpath "gradle.plugin.io.github.ddimtirov:codacy-gradle-plugin:0.1.0"
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE"
-  }
+    dependencies {
+        classpath "com.adarshr:gradle-test-logger-plugin:1.2.0"
+        classpath "net.researchgate:gradle-release:2.7.0"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.17.0"
+        classpath "gradle.plugin.io.github.ddimtirov:codacy-gradle-plugin:0.1.0"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE"
+        classpath "com.bmuschko:gradle-docker-plugin:3.2.7"
+    }
 }
 
 apply plugin: "io.codearte.nexus-staging"
@@ -75,7 +76,7 @@ subprojects {
     }
 
     compileJava   {
-        compileJava.dependsOn(processResources)
+        dependsOn processResources
 
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

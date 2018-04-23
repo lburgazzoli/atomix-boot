@@ -20,15 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import io.atomix.cluster.Node;
+import io.atomix.cluster.NodeConfig;
 import io.atomix.core.Atomix;
 import io.atomix.core.AtomixConfig;
 import io.atomix.primitive.partition.PartitionGroupConfig;
+import io.atomix.utils.net.Address;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
@@ -53,11 +57,35 @@ public class AtomixBootNodeAutoConfiguration {
     @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(AtomixBootNode.class)
     public AtomixBootNode atomixNode() {
+        final String clusterName = configuration.getCluster().getName();
+        final List<NodeConfig> clusterNodes = new ArrayList<>();
+
+        // first add statically configured nodes
+        clusterNodes.addAll(configuration.getCluster().getNodes());
+
+        // then use DiscoveryClient to discovery additional nodes
+        if (discoveryClient != null && clusterName != null) {
+            for (ServiceInstance instance: discoveryClient.getInstances(clusterName)) {
+                String type = instance.getMetadata().getOrDefault("atomix.node.type", "CORE");
+                String id = instance.getMetadata().get("atomix.node.id");
+
+                NodeConfig nodeConfig = new NodeConfig();
+                nodeConfig.setAddress(Address.from(instance.getHost(), instance.getPort()));
+                nodeConfig.setType(Node.Type.valueOf(type));
+
+                if (id != null) {
+                    nodeConfig.setId(id);
+                }
+
+                clusterNodes.add(nodeConfig);
+            }
+        }
+
         AtomixConfig config = new AtomixConfig();
         config.setDataDirectory(configuration.getDataDirectory());
         config.getClusterConfig().setLocalNode(configuration.getLocalNode());
         config.getClusterConfig().setName(configuration.getCluster().getName());
-        config.getClusterConfig().setNodes(configuration.getCluster().getNodes());
+        config.getClusterConfig().setNodes(clusterNodes);
 
         List<PartitionGroupConfig> partitions = new ArrayList<>();
         configuration.getPartitionGroups().getRaft().forEach(partitions::add);
@@ -66,7 +94,7 @@ public class AtomixBootNodeAutoConfiguration {
 
         return new AtomixBootNode(
             Atomix.builder(config).build(),
-            Optional.ofNullable(null),
+            Optional.ofNullable(clusterName),
             Optional.ofNullable(serviceRegistry)
         );
     }

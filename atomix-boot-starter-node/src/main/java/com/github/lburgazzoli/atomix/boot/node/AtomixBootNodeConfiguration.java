@@ -16,14 +16,13 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.validation.Valid;
 
-import io.atomix.cluster.NodeConfig;
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootConfiguration;
+import io.atomix.protocols.backup.partition.PrimaryBackupPartitionGroupConfig;
 import io.atomix.protocols.raft.partition.RaftPartitionGroupConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -31,62 +30,11 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("atomix.node")
-public class AtomixBootNodeConfiguration {
-    private boolean enabled = true;
-
-    @Valid
-    @Nonnull
-    @NestedConfigurationProperty
-    private NodeConfig localNode;
-
-    @Nullable
-    private File dataDirectory;
-
-    @Valid
-    @Nonnull
-    @NestedConfigurationProperty
-    private Cluster cluster;
-
+public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
     @Valid
     @Nonnull
     @NestedConfigurationProperty
     public PartitionsGroups partitionGroups;
-
-    // ****************************************
-    // Properties
-    // ****************************************
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public NodeConfig getLocalNode() {
-        return localNode;
-    }
-
-    public void setLocalNode(NodeConfig localNode) {
-        this.localNode = localNode;
-    }
-
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
-    public File getDataDirectory() {
-        return dataDirectory;
-    }
-
-    public void setDataDirectory(File dataDirectory) {
-        this.dataDirectory = dataDirectory;
-    }
 
     public PartitionsGroups getPartitionGroups() {
         return partitionGroups;
@@ -96,39 +44,23 @@ public class AtomixBootNodeConfiguration {
         this.partitionGroups = partitionGroups;
     }
 
-    // ****************************************
-    // Nested config
-    // ****************************************
-
-    public static class Cluster {
-        @Nonnull
-        public String name;
-
-        public List<NodeConfig> nodes = new ArrayList<>();
-
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public List<NodeConfig> getNodes() {
-            return nodes;
-        }
-
-        public void setNodes(List<NodeConfig> nodes) {
-            this.nodes = nodes;
-        }
-    }
-
     public static class PartitionsGroups {
+        /**
+         * Raft partitions.
+         */
         public List<RaftPartitionGroupConfig> raft = new ArrayList<>();
+
+        /**
+         * PrimaryBackup partitions.
+         */
+        public List<PrimaryBackupPartitionGroupConfig> primaryBackup = new ArrayList<>();
 
         public List<RaftPartitionGroupConfig> getRaft() {
             return raft;
+        }
+
+        public List<PrimaryBackupPartitionGroupConfig> getPrimaryBackup() {
+            return primaryBackup;
         }
     }
 }

@@ -17,23 +17,27 @@
 package com.github.lburgazzoli.atomix.boot.node;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
 import io.atomix.cluster.Node;
 import org.springframework.cloud.client.serviceregistry.Registration;
 
 public class AtomixBootNodeRegistration implements Registration {
-    private final String serviceId;
+    private final String clusterName;
     private final Node node;
+    private final Map<String, String> meta;
 
-    public AtomixBootNodeRegistration(String serviceId, Node node) {
-        this.serviceId = serviceId;
+    public AtomixBootNodeRegistration(String clusterName, Node node) {
+        this.clusterName = clusterName;
         this.node = node;
+        this.meta = Collections.unmodifiableMap(AtomixBootUtils.getMeta(node));
     }
 
     @Override
     public String getServiceId() {
-        return serviceId;
+        return clusterName;
     }
 
     @Override
@@ -58,6 +62,6 @@ public class AtomixBootNodeRegistration implements Registration {
 
     @Override
     public Map<String, String> getMetadata() {
-        return null;
+        return this.meta;
     }
 }

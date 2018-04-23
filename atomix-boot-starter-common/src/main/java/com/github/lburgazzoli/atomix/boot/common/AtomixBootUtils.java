@@ -16,7 +16,25 @@
  */
 package com.github.lburgazzoli.atomix.boot.common;
 
-public final class AtomixUtil {
-    private AtomixUtil() {
+import java.util.HashMap;
+import java.util.Map;
+
+import io.atomix.cluster.Node;
+
+public final class AtomixBootUtils {
+    private AtomixBootUtils() {
+    }
+
+    public static  Map<String, String>  getMeta(Node node) {
+        Map<String, String> meta = new HashMap<>();
+        meta.put("atomix.node.address.host", node.address().host());
+        meta.put("atomix.node.address.port", Integer.toString(node.address().port()));
+        meta.put("atomix.node.host", node.host());
+        meta.put("atomix.node.rack", node.rack());
+        meta.put("atomix.node.zone", node.zone());
+        meta.put("atomix.node.type", node.type().name());
+        meta.put("atomix.node.id", node.id().id());
+
+        return meta;
     }
 }

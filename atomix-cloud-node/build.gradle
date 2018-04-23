@@ -1,4 +1,5 @@
 apply plugin: "org.springframework.boot"
+apply from: "${rootProject.projectDir}/gradle/docker-consul.gradle"
 
 dependencies {
     implementation project(':atomix-boot-starter-node')
@@ -11,4 +12,80 @@ jar {
 
 bootJar {
     classifier = 'boot'
+}
+
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerLogsContainer
+import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
+
+task pullImage(type: DockerPullImage) {
+    repository = 'docker.io/consul'
+    tag = '1.0.7'
+}
+
+task createConsulContainer(type: DockerCreateContainer) {
+    dependsOn pullImage
+    targetImageId {
+        pullImage.getImageId()
+    }
+
+    containerName = 'atomix-consul'
+
+    portBindings = [
+        '8500:8500'
+    ]
+    cmd = [
+        'agent',
+        '-dev',
+        '-server',
+        '-datacenter',
+        'neverland',
+        '-client',
+        '0.0.0.0',
+        '-log-level',
+        'trace'
+    ]
+}
+
+task removeConsulContainer(type: DockerRemoveContainer) {
+    targetContainerId {
+        'atomix-consul'
+    }
+}
+
+task startConsulContainer(type: DockerStartContainer) {
+    dependsOn createConsulContainer
+
+    targetContainerId {
+        'atomix-consul'
+    }
+}
+
+task stopConsul(type: DockerStopContainer) {
+    targetContainerId {
+        'atomix-consul'
+    }
+
+    finalizedBy removeConsulContainer
+}
+
+task startConsul(type: DockerLogsContainer) {
+    dependsOn startConsulContainer
+
+    targetContainerId {
+        'atomix-consul'
+    }
+
+    follow = true
+    tailAll = true
+
+    onNext {
+        println it.toString() // each log message from the container will be passed as it's made available
+    }
 }
