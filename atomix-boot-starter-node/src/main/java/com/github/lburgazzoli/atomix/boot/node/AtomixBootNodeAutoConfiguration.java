@@ -90,6 +90,7 @@ public class AtomixBootNodeAutoConfiguration {
 
         List<PartitionGroupConfig> partitions = new ArrayList<>();
         configuration.getPartitionGroups().getRaft().forEach(partitions::add);
+        configuration.getPartitionGroups().getPrimaryBackup().forEach(partitions::add);
 
         config.setPartitionGroups(partitions);
 

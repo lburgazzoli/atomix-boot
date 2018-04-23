@@ -18,9 +18,7 @@ package com.github.lburgazzoli.atomix.cloud.node;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@EnableDiscoveryClient
 @SpringBootApplication
 public class AtomixCloudNodeApplication {
     public static void main(String[] args) {

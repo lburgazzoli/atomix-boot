@@ -7,10 +7,6 @@ spring:
       port: 8500
       discovery:
         enabled: true
-        #health-check-path: ${management.context-path}/health
-        #health-check-interval: 15s
-      registration:
-        enabled: true
 
 management:
   endpoints:
@@ -33,7 +29,6 @@ atomix:
     cluster:
       name: ${spring.application.name}
     partition-groups:
-      raft:
-        - name: raft
+      primary-backup:
+        - name: "pb"
           partitions: 3
-          partition-size: 3

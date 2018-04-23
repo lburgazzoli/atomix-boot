@@ -22,11 +22,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.atomix.cluster.Node;
 import io.atomix.core.Atomix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.Lifecycle;
 
 public final class AtomixBootNode implements Lifecycle {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AtomixBootNode.class);
+
     private final AtomicBoolean running;
     private final Atomix atomix;
     private final Optional<String> serviceId;
@@ -46,12 +50,16 @@ public final class AtomixBootNode implements Lifecycle {
         if (running.compareAndSet(false, true)) {
             atomix.start().thenAccept(
                 a -> {
+                    LOGGER.info("Node {} started", atomix.clusterService().getLocalNode().id());
+
                     if (!serviceId.isPresent() || !serviceRegistry.isPresent()) {
                         return;
                     }
 
                     final Node node = atomix.clusterService().getLocalNode();
                     final Registration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
+
+                    LOGGER.info("Registering node {} to {}", node.id(), registration);
 
                     serviceRegistration.set(registration);
                     serviceRegistry.get().register(registration);
