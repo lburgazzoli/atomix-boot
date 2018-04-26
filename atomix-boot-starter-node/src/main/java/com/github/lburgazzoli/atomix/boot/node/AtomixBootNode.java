@@ -62,7 +62,12 @@ public final class AtomixBootNode implements Lifecycle {
                     LOGGER.info("Registering node {} to {}", node.id(), registration);
 
                     serviceRegistration.set(registration);
-                    serviceRegistry.get().register(registration);
+
+                    try {
+                        serviceRegistry.get().register(registration);
+                    } catch (Exception e) {
+                        LOGGER.warn("Unable to register this node as service {}", registration, e);
+                    }
                 }
             );
         }

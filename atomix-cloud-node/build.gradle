@@ -107,6 +107,7 @@ task stopConsul(type: DockerStopContainer) {
 
 task startConsul(type: DockerLogsContainer) {
     dependsOn startConsulContainer
+    finalizedBy stopConsul
 
     targetContainerId {
         'atomix-consul'
