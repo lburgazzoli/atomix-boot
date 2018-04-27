@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node;
+package com.github.lburgazzoli.atomix.boot.common;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
 import io.atomix.cluster.Node;
 import org.springframework.cloud.client.serviceregistry.Registration;
 

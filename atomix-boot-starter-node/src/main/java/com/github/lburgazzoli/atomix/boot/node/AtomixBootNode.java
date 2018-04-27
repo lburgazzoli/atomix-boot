@@ -18,14 +18,13 @@ package com.github.lburgazzoli.atomix.boot.node;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistration;
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
 import io.atomix.cluster.Node;
 import io.atomix.core.Atomix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.serviceregistry.Registration;
-import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.Lifecycle;
 
 public final class AtomixBootNode implements Lifecycle {
@@ -34,15 +33,13 @@ public final class AtomixBootNode implements Lifecycle {
     private final AtomicBoolean running;
     private final Atomix atomix;
     private final Optional<String> serviceId;
-    private final Optional<ServiceRegistry> serviceRegistry;
-    private final AtomicReference<Registration> serviceRegistration;
+    private final Optional<AtomixBootNodeRegistry> nodeRegistry;
 
-    public AtomixBootNode(Atomix atomix, Optional<String> serviceId, Optional<ServiceRegistry> serviceRegistry) {
+    public AtomixBootNode(Atomix atomix, Optional<String> serviceId, Optional<AtomixBootNodeRegistry> nodeRegistry) {
         this.running = new AtomicBoolean(false);
         this.atomix = atomix;
         this.serviceId = serviceId;
-        this.serviceRegistry = serviceRegistry;
-        this.serviceRegistration = new AtomicReference<>();
+        this.nodeRegistry = nodeRegistry;
     }
 
     @Override
@@ -52,19 +49,17 @@ public final class AtomixBootNode implements Lifecycle {
                 a -> {
                     LOGGER.info("Node {} started", atomix.clusterService().getLocalNode().id());
 
-                    if (!serviceId.isPresent() || !serviceRegistry.isPresent()) {
+                    if (!serviceId.isPresent() || !nodeRegistry.isPresent()) {
                         return;
                     }
 
                     final Node node = atomix.clusterService().getLocalNode();
-                    final Registration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
+                    final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
 
                     LOGGER.info("Registering node {} to {}", node.id(), registration);
 
-                    serviceRegistration.set(registration);
-
                     try {
-                        serviceRegistry.get().register(registration);
+                        nodeRegistry.get().register(registration);
                     } catch (Exception e) {
                         LOGGER.warn("Unable to register this node as service {}", registration, e);
                     }
@@ -76,10 +71,11 @@ public final class AtomixBootNode implements Lifecycle {
     @Override
     public void stop() {
         if (running.compareAndSet(true, false)) {
-            final Registration registration = serviceRegistration.get();
+            final Node node = atomix.clusterService().getLocalNode();
+            final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
 
-            if (registration != null && serviceRegistry.isPresent()) {
-                serviceRegistry.get().deregister(registration);
+            if (nodeRegistry.isPresent()) {
+                nodeRegistry.get().deregister(registration);
             }
 
             atomix.stop();
@@ -91,7 +87,7 @@ public final class AtomixBootNode implements Lifecycle {
         return atomix.isRunning();
     }
 
-    public Atomix node() {
+    public Atomix getNode() {
         return atomix;
     }
 }

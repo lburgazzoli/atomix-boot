@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
 import io.atomix.cluster.Node;
 import io.atomix.cluster.NodeConfig;
@@ -35,8 +36,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -44,7 +43,6 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 @ConditionalOnClass(name = "io.atomix.core.Atomix")
 @ConditionalOnProperty(prefix = "atomix.node", name = "enabled", matchIfMissing = true)
-@EnableDiscoveryClient(autoRegister=false)
 @EnableConfigurationProperties(AtomixBootNodeConfiguration.class)
 public class AtomixBootNodeAutoConfiguration {
     @Autowired
@@ -52,7 +50,7 @@ public class AtomixBootNodeAutoConfiguration {
     @Autowired(required = false)
     private DiscoveryClient discoveryClient;
     @Autowired(required = false)
-    private ServiceRegistry serviceRegistry;
+    private AtomixBootNodeRegistry nodeRegistry;
 
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
@@ -60,6 +58,9 @@ public class AtomixBootNodeAutoConfiguration {
     public AtomixBootNode atomixNode() {
         final String clusterName = configuration.getCluster().getName();
         final List<NodeConfig> clusterNodes = new ArrayList<>();
+
+        // local node
+        clusterNodes.add(configuration.getLocalNode());
 
         // first add statically configured nodes
         clusterNodes.addAll(configuration.getCluster().getNodes());
@@ -97,7 +98,7 @@ public class AtomixBootNodeAutoConfiguration {
         return new AtomixBootNode(
             Atomix.builder(config).build(),
             Optional.ofNullable(clusterName),
-            Optional.ofNullable(serviceRegistry)
+            Optional.ofNullable(nodeRegistry)
         );
     }
 }

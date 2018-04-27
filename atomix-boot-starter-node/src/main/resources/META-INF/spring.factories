@@ -1,2 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.lburgazzoli.atomix.boot.node.AtomixBootNodeAutoConfiguration
+    com.github.lburgazzoli.atomix.boot.node.AtomixBootNodeAutoConfiguration,\
+    com.github.lburgazzoli.atomix.boot.node.consul.AtomixBootConsulAutoConfiguration
+

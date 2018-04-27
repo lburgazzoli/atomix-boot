@@ -3,6 +3,8 @@ apply from: "${rootProject.projectDir}/gradle/codacy.gradle"
 dependencies {
     api project(':atomix-boot-starter-common')
 
+    compileOnly "org.springframework.cloud:spring-cloud-starter-consul-discovery:$versions.spring_consul"
+
     testImplementation "org.hibernate.validator:hibernate-validator:$versions.hibernate_validator"
     testImplementation ("org.springframework.boot:spring-boot-starter-test:$versions.spring_boot") {
         exclude group: 'junit', module: 'junit'

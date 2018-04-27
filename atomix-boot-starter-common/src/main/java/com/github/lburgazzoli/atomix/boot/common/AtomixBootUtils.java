@@ -33,16 +33,23 @@ public final class AtomixBootUtils {
     private AtomixBootUtils() {
     }
 
-    public static  Map<String, String>  getMeta(Node node) {
-        Map<String, String> meta = new HashMap<>();
-        meta.put(META_NODE_ADDRESS_HOST, node.address().host());
-        meta.put(META_NODE_ADDRESS_PORT, Integer.toString(node.address().port()));
-        meta.put(META_NODE_HOST, node.host());
-        meta.put(META_NODE_RACK, node.rack());
-        meta.put(META_NODE_ZONE, node.zone());
-        meta.put(META_NODE_TYPE, node.type().name());
-        meta.put(META_NODE_ID, node.id().id());
+    public static Map<String, String>  getMeta(Node node) {
+        final Map<String, String> meta = new HashMap<>();
+
+        putIfNotNull(meta ,META_NODE_ADDRESS_HOST, node.address().host());
+        putIfNotNull(meta ,META_NODE_ADDRESS_PORT, Integer.toString(node.address().port()));
+        putIfNotNull(meta ,META_NODE_HOST, node.host());
+        putIfNotNull(meta ,META_NODE_RACK, node.rack());
+        putIfNotNull(meta ,META_NODE_ZONE, node.zone());
+        putIfNotNull(meta ,META_NODE_TYPE, node.type().name());
+        putIfNotNull(meta ,META_NODE_ID, node.id().id());
 
         return meta;
+    }
+
+    public static <K, V> void putIfNotNull(Map<K, V> map, K key, V val) {
+        if (map != null && key != null && val != null) {
+            map.put(key, val);
+        }
     }
 }
