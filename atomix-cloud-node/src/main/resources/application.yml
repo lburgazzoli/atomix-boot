@@ -27,7 +27,7 @@ logging:
 atomix:
   node:
     data-directory: ${java.io.tmpdir}/${atomix.node.local-node.id}
-    local-node:
+    local-member:
       id: ${spring.application.name}-${random.uuid}
       type: EPHEMERAL
       address: ${node.ip:localhost}:${node.port:8700}

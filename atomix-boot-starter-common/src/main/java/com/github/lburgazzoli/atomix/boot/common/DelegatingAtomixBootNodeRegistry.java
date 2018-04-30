@@ -18,10 +18,14 @@ package com.github.lburgazzoli.atomix.boot.common;
 
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 
 public class DelegatingAtomixBootNodeRegistry<R extends Registration> implements AtomixBootNodeRegistry {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DelegatingAtomixBootNodeRegistry.class);
+
     private final ServiceRegistry<R> serviceRegistry;
     private final Function<AtomixBootNodeRegistration, R> converter;
 
@@ -32,11 +36,13 @@ public class DelegatingAtomixBootNodeRegistry<R extends Registration> implements
 
     @Override
     public void register(AtomixBootNodeRegistration registration) {
+        LOGGER.info("Register member: {} to registry: {}", registration, serviceRegistry);
         this.serviceRegistry.register(converter.apply(registration));
     }
 
     @Override
     public void deregister(AtomixBootNodeRegistration registration) {
+        LOGGER.info("De-register member: {} from registry: {}", registration, serviceRegistry);
         this.serviceRegistry.deregister(converter.apply(registration));
     }
 }

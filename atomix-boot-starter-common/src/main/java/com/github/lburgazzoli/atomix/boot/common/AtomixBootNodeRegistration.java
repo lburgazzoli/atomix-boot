@@ -63,4 +63,13 @@ public class AtomixBootNodeRegistration implements Registration {
     public Map<String, String> getMetadata() {
         return this.meta;
     }
+
+    @Override
+    public String toString() {
+        return "AtomixBootNodeRegistration{" +
+            "clusterName='" + clusterName + '\'' +
+            ", member=" + member +
+            ", meta=" + meta +
+            '}';
+    }
 }

@@ -50,7 +50,7 @@ public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
 
     @Valid
     @NestedConfigurationProperty
-    private PartitionsGroups partitionGroups;
+    private PartitionsGroups partitionGroups = new PartitionsGroups();
 
     public List<Profile> getProfiles() {
         return profiles;

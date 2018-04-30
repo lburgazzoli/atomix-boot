@@ -56,8 +56,6 @@ public final class AtomixBootNode implements Lifecycle {
                     final Member member = atomix.membershipService().getLocalMember();
                     final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
 
-                    LOGGER.info("Registering node {} to {}", member.id(), registration);
-
                     try {
                         nodeRegistry.get().register(registration);
                     } catch (Exception e) {
