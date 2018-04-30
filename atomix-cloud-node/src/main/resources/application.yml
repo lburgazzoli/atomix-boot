@@ -2,12 +2,14 @@ spring:
   application:
     name: atomix-boot-node
   cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
     consul:
       host: localhost
       port: 8500
       discovery:
         enabled: true
-        register: false
       enabled: true
 
 server:

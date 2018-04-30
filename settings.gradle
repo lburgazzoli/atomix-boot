@@ -6,4 +6,6 @@ include ':atomix-boot-starter-node'
 include ':atomix-boot-starter-client'
 
 // cloud
+include ':atomix-cloud-starter-consul'
+include ':atomix-cloud-starter-zookeeper'
 include ':atomix-cloud-node'

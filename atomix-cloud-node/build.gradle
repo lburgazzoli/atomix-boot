@@ -3,7 +3,7 @@ apply plugin: 'com.bmuschko.docker-remote-api'
 
 dependencies {
     implementation project(':atomix-boot-starter-node')
-    implementation "org.springframework.cloud:spring-cloud-starter-consul-discovery:$versions.spring_consul"
+    implementation project(':atomix-cloud-starter-consul')
 
     implementation ("org.springframework.boot:spring-boot-starter-web:$versions.spring_boot") {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"

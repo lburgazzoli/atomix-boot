@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':atomix-boot-starter-common')
+    implementation project(':atomix-boot-starter-node')
+    implementation "org.springframework.cloud:spring-cloud-starter-consul-discovery:$versions.spring_consul"
+}

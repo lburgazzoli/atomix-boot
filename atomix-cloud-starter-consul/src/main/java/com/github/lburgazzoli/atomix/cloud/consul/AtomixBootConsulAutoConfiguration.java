@@ -14,22 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node.consul;
+package com.github.lburgazzoli.atomix.cloud.consul;
 
 import java.util.stream.Collectors;
 
 import com.ecwid.consul.v1.agent.model.NewService;
-import com.github.lburgazzoli.atomix.boot.common.AbstractAtomixBootNodeRegistry;
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistration;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
+import com.github.lburgazzoli.atomix.boot.common.DelegatingAtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.node.AtomixBootNodeAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.consul.ConditionalOnConsulEnabled;
 import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.consul.serviceregistry.ConsulRegistration;
@@ -41,11 +38,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @AutoConfigureAfter(ConsulServiceRegistryAutoConfiguration.class)
 @AutoConfigureBefore(AtomixBootNodeAutoConfiguration.class)
-@EnableDiscoveryClient(autoRegister = false)
 @ConditionalOnConsulEnabled
-@ConditionalOnClass(name = "org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry")
 public class AtomixBootConsulAutoConfiguration {
-
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean({ConsulServiceRegistry.class, ConsulDiscoveryProperties.class})
@@ -53,9 +47,7 @@ public class AtomixBootConsulAutoConfiguration {
             final ConsulServiceRegistry serviceRegistry,
             final ConsulDiscoveryProperties discoveryProperties) {
 
-        return new AbstractAtomixBootNodeRegistry<ConsulRegistration>(serviceRegistry) {
-            @Override
-            protected ConsulRegistration toNativeRegistration(AtomixBootNodeRegistration registration) {
+        return new DelegatingAtomixBootNodeRegistry<>(serviceRegistry, registration -> {
                 NewService service = new NewService();
                 service.setId(registration.getMetadata().get(AtomixBootUtils.META_NODE_ID));
                 service.setName(registration.getServiceId());
@@ -69,6 +61,6 @@ public class AtomixBootConsulAutoConfiguration {
 
                 return new ConsulRegistration(service, discoveryProperties);
             }
-        };
+        );
     }
 }

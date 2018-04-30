@@ -40,6 +40,7 @@ public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
         return partitionGroups;
     }
 
+
     public void setPartitionGroups(PartitionsGroups partitionGroups) {
         this.partitionGroups = partitionGroups;
     }

@@ -16,25 +16,27 @@
  */
 package com.github.lburgazzoli.atomix.boot.common;
 
+import java.util.function.Function;
+
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 
-public abstract class AbstractAtomixBootNodeRegistry<R extends Registration> implements AtomixBootNodeRegistry {
+public class DelegatingAtomixBootNodeRegistry<R extends Registration> implements AtomixBootNodeRegistry {
     private final ServiceRegistry<R> serviceRegistry;
+    private final Function<AtomixBootNodeRegistration, R> converter;
 
-    public AbstractAtomixBootNodeRegistry(ServiceRegistry<R> serviceRegistry) {
+    public DelegatingAtomixBootNodeRegistry(ServiceRegistry<R> serviceRegistry, Function<AtomixBootNodeRegistration, R> converter) {
         this.serviceRegistry = serviceRegistry;
+        this.converter = converter;
     }
 
     @Override
     public void register(AtomixBootNodeRegistration registration) {
-        this.serviceRegistry.register(toNativeRegistration(registration));
+        this.serviceRegistry.register(converter.apply(registration));
     }
 
     @Override
     public void deregister(AtomixBootNodeRegistration registration) {
-        this.serviceRegistry.deregister(toNativeRegistration(registration));
+        this.serviceRegistry.deregister(converter.apply(registration));
     }
-
-    protected abstract R toNativeRegistration(AtomixBootNodeRegistration registration);
 }
