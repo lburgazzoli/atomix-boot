@@ -94,7 +94,9 @@ subprojects {
         api "io.atomix:atomix-raft:$versions.atomix"
         api "io.atomix:atomix-primary-backup:$versions.atomix"
 
-        api "org.springframework.boot:spring-boot-starter:$versions.spring_boot"
+        api "org.springframework.boot:spring-boot:$versions.spring_boot"
+        api "org.springframework.boot:spring-boot-autoconfigure:$versions.spring_boot"
+        api "org.springframework.boot:spring-boot-actuator:$versions.spring_boot"
         api "org.springframework.cloud:spring-cloud-commons:$versions.spring_cloud"
 
         annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$versions.spring_boot"

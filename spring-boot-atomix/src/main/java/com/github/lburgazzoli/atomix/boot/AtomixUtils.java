@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.common;
+package com.github.lburgazzoli.atomix.boot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ import java.util.Map;
 import io.atomix.cluster.Member;
 
 
-public final class AtomixBootUtils {
+public final class AtomixUtils {
     public static final String META_NODE_ID = "atomix.node.id";
     public static final String META_NODE_TYPE = "atomix.node.type";
     public static final String META_NODE_ZONE = "atomix.node.zone";
@@ -31,10 +31,10 @@ public final class AtomixBootUtils {
     public static final String META_NODE_ADDRESS_HOST = "atomix.node.address.host";
     public static final String META_NODE_ADDRESS_PORT = "atomix.node.address.port";
 
-    private AtomixBootUtils() {
+    private AtomixUtils() {
     }
 
-    public static Map<String, String>  getMeta(Member member) {
+    public static Map<String, String> getMeta(Member member) {
         final Map<String, String> meta = new HashMap<>();
 
         putIfNotNull(meta ,META_NODE_ADDRESS_HOST, member.address().host());

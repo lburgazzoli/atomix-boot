@@ -14,18 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.common;
+package com.github.lburgazzoli.atomix.boot;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import io.atomix.cluster.MemberConfig;
+import io.atomix.protocols.backup.partition.PrimaryBackupPartitionGroupConfig;
+import io.atomix.protocols.raft.partition.RaftPartitionGroupConfig;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.validation.annotation.Validated;
 
+
+@Validated
+@ConfigurationProperties("atomix")
 public abstract class AtomixBootConfiguration {
     private boolean enabled = true;
+
+    private File configurationPath;
 
     @Valid
     @NotNull
@@ -37,6 +47,12 @@ public abstract class AtomixBootConfiguration {
     @NestedConfigurationProperty
     private Cluster cluster;
 
+    private List<AtomixProfile> profiles = new ArrayList<>();
+
+    @Valid
+    @NestedConfigurationProperty
+    private PartitionsGroups partitionGroups = new PartitionsGroups();
+
     // ***************
     // Properties
     // ***************
@@ -47,6 +63,18 @@ public abstract class AtomixBootConfiguration {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public File getConfigurationPath() {
+        return configurationPath;
+    }
+
+    public void setConfigurationPath(File configurationPath) {
+        this.configurationPath = configurationPath;
+    }
+
+    public boolean hasConfigurationPath() {
+        return this.configurationPath != null && this.configurationPath.exists();
     }
 
     public MemberConfig getLocalMember() {
@@ -63,6 +91,23 @@ public abstract class AtomixBootConfiguration {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
+    }
+
+    public List<AtomixProfile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(List<AtomixProfile> profiles) {
+        this.profiles = profiles;
+    }
+
+    public PartitionsGroups getPartitionGroups() {
+        return partitionGroups;
+    }
+
+
+    public void setPartitionGroups(PartitionsGroups partitionGroups) {
+        this.partitionGroups = partitionGroups;
     }
 
     // ***************
@@ -95,6 +140,26 @@ public abstract class AtomixBootConfiguration {
 
         public void setMembers(List<MemberConfig> members) {
             this.members = members;
+        }
+    }
+
+    public static class PartitionsGroups {
+        /**
+         * Raft partitions.
+         */
+        private List<RaftPartitionGroupConfig> raft = new ArrayList<>();
+
+        /**
+         * PrimaryBackup partitions.
+         */
+        private List<PrimaryBackupPartitionGroupConfig> primaryBackup = new ArrayList<>();
+
+        public List<RaftPartitionGroupConfig> getRaft() {
+            return raft;
+        }
+
+        public List<PrimaryBackupPartitionGroupConfig> getPrimaryBackup() {
+            return primaryBackup;
         }
     }
 }

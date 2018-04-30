@@ -30,27 +30,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties("atomix.node")
 public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
-    enum Profile {
-        CONSENSUS(io.atomix.core.profile.Profile.CONSENSUS),
-        DATA_GRID(io.atomix.core.profile.Profile.DATA_GRID),
-        CLIENT(io.atomix.core.profile.Profile.CLIENT);
-
-        private io.atomix.core.profile.Profile value;
-
-        Profile(io.atomix.core.profile.Profile value) {
-            this.value = value;
-        }
-
-        io.atomix.core.profile.Profile value() {
-            return value;
-        }
-    }
-
-    private List<Profile> profiles = new ArrayList<>();
-
-    @Valid
-    @NestedConfigurationProperty
-    private PartitionsGroups partitionGroups = new PartitionsGroups();
 
     public List<Profile> getProfiles() {
         return profiles;

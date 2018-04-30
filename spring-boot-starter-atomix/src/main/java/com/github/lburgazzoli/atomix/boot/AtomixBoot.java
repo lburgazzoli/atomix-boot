@@ -14,53 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node;
+package com.github.lburgazzoli.atomix.boot;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistration;
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
-import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.Lifecycle;
 
-public final class AtomixBootNode implements Lifecycle {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixBootNode.class);
+public final class AtomixBoot implements Lifecycle {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixBoot.class);
 
-    private final AtomicBoolean running;
     private final Atomix atomix;
-    private final Optional<String> serviceId;
-    private final Optional<AtomixBootNodeRegistry> nodeRegistry;
+    private final List<Listener> listeners;
 
-    public AtomixBootNode(Atomix atomix, Optional<String> serviceId, Optional<AtomixBootNodeRegistry> nodeRegistry) {
-        this.running = new AtomicBoolean(false);
-        this.atomix = atomix;
-        this.serviceId = serviceId;
-        this.nodeRegistry = nodeRegistry;
+    public AtomixBoot(Atomix atomix, List<Listener> listeners) {
+         this.atomix = atomix;
+        this.listeners = listeners;
     }
 
     @Override
     public void start() {
-        if (running.compareAndSet(false, true)) {
+        if (!atomix.isRunning()) {
             atomix.start().thenAccept(
                 a -> {
                     LOGGER.info("Node {} started", atomix.membershipService().getLocalMember().id());
 
+                    for (Listener listener: listeners) {
+                        listener.started(atomix);
+                    }
+
+                    /*
                     if (!serviceId.isPresent() || !nodeRegistry.isPresent()) {
                         return;
                     }
 
+                    //atomix.membershipService().getLocalMember().
                     final Member member = atomix.membershipService().getLocalMember();
-                    final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
+                    final AtomixBootRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
 
                     try {
                         nodeRegistry.get().register(registration);
                     } catch (Exception e) {
                         LOGGER.warn("Unable to register this node as service {}", registration, e);
                     }
+                    */
                 }
             );
         }
@@ -68,6 +67,18 @@ public final class AtomixBootNode implements Lifecycle {
 
     @Override
     public void stop() {
+        atomix.stop().thenAccept(
+            a -> {
+                LOGGER.info("Node {} stopped", atomix.membershipService().getLocalMember().id());
+
+                for (Listener listener: listeners) {
+                    listener.stopped(atomix);
+                }
+            }
+        );
+
+            /*
+
         if (running.compareAndSet(true, false)) {
             final Member member = atomix.membershipService().getLocalMember();
             final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
@@ -78,6 +89,7 @@ public final class AtomixBootNode implements Lifecycle {
 
             atomix.stop();
         }
+        */
     }
 
     @Override
@@ -87,5 +99,15 @@ public final class AtomixBootNode implements Lifecycle {
 
     public Atomix getNode() {
         return atomix;
+    }
+
+    // ****************
+    //
+    // ****************
+
+    public interface Listener {
+        void started(Atomix atomix);
+
+        void stopped(Atomix atomix);
     }
 }

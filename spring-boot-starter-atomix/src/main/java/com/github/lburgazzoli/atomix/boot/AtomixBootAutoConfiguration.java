@@ -14,25 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node;
+package com.github.lburgazzoli.atomix.boot;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
-import io.atomix.cluster.Member;
-import io.atomix.cluster.MemberConfig;
 import io.atomix.core.Atomix;
 import io.atomix.core.AtomixConfig;
-import io.atomix.utils.net.Address;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.atomix.utils.config.Configs;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -40,21 +35,25 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 @ConditionalOnClass(name = "io.atomix.core.Atomix")
 @ConditionalOnProperty(prefix = "atomix.node", name = "enabled", matchIfMissing = true)
-@EnableConfigurationProperties(AtomixBootNodeConfiguration.class)
-public class AtomixBootNodeAutoConfiguration {
-    @Autowired
-    private AtomixBootNodeConfiguration configuration;
-    @Autowired(required = false)
-    private DiscoveryClient discoveryClient;
-    @Autowired(required = false)
-    private AtomixBootNodeRegistry nodeRegistry;
+@EnableConfigurationProperties(AtomixBootConfiguration.class)
+public class AtomixBootAutoConfiguration {
 
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    @Bean(name = "atomix-node", initMethod = "start", destroyMethod = "stop")
-    @ConditionalOnMissingBean(AtomixBootNode.class)
-    public AtomixBootNode atomixNode() {
-        final String clusterName = configuration.getCluster().getName();
-        final AtomixConfig config = new AtomixConfig();
+    @Bean(name = "atomix", initMethod = "start", destroyMethod = "stop")
+    @ConditionalOnMissingBean(AtomixBoot.class)
+    public AtomixBoot atomix(
+            AtomixBootConfiguration configuration,
+            Optional<List<AtomixBoot.Listener>> listeners,
+            Optional<List<AtomixConfigurationCustomizer>> customizers) {
+
+        //final String clusterName = configuration.getCluster().getName();
+        final AtomixConfig config;
+
+        if (configuration.hasConfigurationPath()) {
+            config = Configs.load(configuration.getConfigurationPath(), AtomixConfig.class);
+        } else {
+            config = new AtomixConfig();
+        }
 
         // common conf
         config.getClusterConfig().setLocalMember(configuration.getLocalMember());
@@ -66,6 +65,7 @@ public class AtomixBootNodeAutoConfiguration {
         // first add statically configured nodes
         configuration.getCluster().getMembers().forEach(config.getClusterConfig()::addMember);
 
+        /*
         // then use DiscoveryClient to discovery additional nodes
         if (discoveryClient != null && clusterName != null) {
             for (ServiceInstance instance: discoveryClient.getInstances(clusterName)) {
@@ -87,18 +87,25 @@ public class AtomixBootNodeAutoConfiguration {
                 config.getClusterConfig().addMember(memberConfig);
             }
         }
+        */
 
         // Partitions
         configuration.getPartitionGroups().getRaft().forEach(config::addPartitionGroup);
         configuration.getPartitionGroups().getPrimaryBackup().forEach(config::addPartitionGroup);
 
         // Profiles
-        configuration.getProfiles().stream().map(AtomixBootNodeConfiguration.Profile::value).forEach(config::addProfile);
+        configuration.getProfiles().stream().map(AtomixProfile::value).forEach(config::addProfile);
 
-        return new AtomixBootNode(
+        // Apply customizers
+        customizers.ifPresent(c -> {
+            for (AtomixConfigurationCustomizer customizer : c) {
+                customizer.customize(config);
+            }
+        });
+
+        return new AtomixBoot(
             Atomix.builder(config).build(),
-            Optional.ofNullable(clusterName),
-            Optional.ofNullable(nodeRegistry)
+            listeners.orElseGet(Collections::emptyList)
         );
     }
 }
