@@ -2,8 +2,8 @@ apply plugin: "org.springframework.boot"
 
 dependencies {
     implementation project(':atomix-boot-starter-node')
-    implementation project(':atomix-cloud-starter-consul')
-    implementation project(':atomix-cloud-starter-zookeeper')
+    implementation project(':atomix-cloud-node-starter-consul')
+    implementation project(':atomix-cloud-node-starter-zookeeper')
 
     implementation ("org.springframework.boot:spring-boot-starter-web:$versions.spring_boot") {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"

@@ -6,6 +6,12 @@ include ':atomix-boot-starter-node'
 include ':atomix-boot-starter-client'
 
 // cloud
-include ':atomix-cloud-starter-consul'
-include ':atomix-cloud-starter-zookeeper'
+include ':atomix-cloud-node-starter-consul'
+include ':atomix-cloud-node-starter-zookeeper'
 include ':atomix-cloud-node'
+
+// spring-cloud
+include ':spring-cloud-atomix-core'
+include ':spring-cloud-atomix-config'
+include ':spring-cloud-atomix-discovery'
+include ':spring-cloud-atomix-binder'
