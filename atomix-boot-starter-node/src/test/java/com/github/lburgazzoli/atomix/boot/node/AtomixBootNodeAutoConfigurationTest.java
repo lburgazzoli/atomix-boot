@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import io.atomix.cluster.Member;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -32,7 +31,6 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.SocketUtils;
 
 public class AtomixBootNodeAutoConfigurationTest {
-    @Disabled
     @Test
     public void testValidationFailure() {
         new ApplicationContextRunner()

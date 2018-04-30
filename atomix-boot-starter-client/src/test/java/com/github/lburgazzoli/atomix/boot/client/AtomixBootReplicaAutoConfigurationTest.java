@@ -16,34 +16,26 @@
  */
 package com.github.lburgazzoli.atomix.boot.client;
 
-import java.util.Properties;
-
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.boot.Banner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 
-@Disabled
 public class AtomixBootReplicaAutoConfigurationTest {
-
     @Test
     public void testValidationFailure() {
-        Properties properties = new Properties();
-        properties.put("debug", false);
-        properties.put("spring.main.banner-mode", Banner.Mode.OFF);
-
-        Assertions.assertThatThrownBy(
-            () -> new SpringApplicationBuilder()
-                .properties(properties)
-                .sources(AtomixBootClientAutoConfiguration.class)
-                .run()
-        ).hasMessageContaining(
-            "Field error in object 'atomix.client' on field 'nodes': rejected value [[]]"
-        ).isInstanceOf(
-            UnsatisfiedDependencyException.class
-        );
+        new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(AtomixBootClientAutoConfiguration.class))
+            .withPropertyValues(
+                "debug=false",
+                "spring.main.banner-mode=off")
+            .run(
+                context -> {
+                    Assertions.assertThat(context).isNotNull();
+                    Assertions.assertThat(context).getFailure().isInstanceOf(UnsatisfiedDependencyException.class);
+                }
+            );
     }
 }
