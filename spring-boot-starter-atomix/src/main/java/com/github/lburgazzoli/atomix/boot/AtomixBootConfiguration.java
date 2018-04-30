@@ -32,7 +32,7 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("atomix")
-public abstract class AtomixBootConfiguration {
+public class AtomixBootConfiguration {
     private boolean enabled = true;
 
     private File configurationPath;
@@ -71,10 +71,6 @@ public abstract class AtomixBootConfiguration {
 
     public void setConfigurationPath(File configurationPath) {
         this.configurationPath = configurationPath;
-    }
-
-    public boolean hasConfigurationPath() {
-        return this.configurationPath != null && this.configurationPath.exists();
     }
 
     public MemberConfig getLocalMember() {

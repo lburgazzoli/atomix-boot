@@ -1,5 +1,4 @@
 dependencies {
-    implementation project(':atomix-boot-starter-common')
-    implementation project(':atomix-boot-starter-node')
+    implementation project(':spring-boot-starter-atomix')
     implementation "org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:$versions.spring_consul"
 }

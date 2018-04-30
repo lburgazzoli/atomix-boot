@@ -46,10 +46,9 @@ public class AtomixBootAutoConfiguration {
             Optional<List<AtomixBoot.Listener>> listeners,
             Optional<List<AtomixConfigurationCustomizer>> customizers) {
 
-        //final String clusterName = configuration.getCluster().getName();
         final AtomixConfig config;
 
-        if (configuration.hasConfigurationPath()) {
+        if (configuration.getConfigurationPath() != null) {
             config = Configs.load(configuration.getConfigurationPath(), AtomixConfig.class);
         } else {
             config = new AtomixConfig();
@@ -57,6 +56,7 @@ public class AtomixBootAutoConfiguration {
 
         // common conf
         config.getClusterConfig().setLocalMember(configuration.getLocalMember());
+        config.getClusterConfig().getLocalMember().addTag(String.format("%s=%s", AtomixUtils.META_MEMBER_CLUSTER_ID, configuration.getCluster().getName()));
         config.getClusterConfig().setName(configuration.getCluster().getName());
 
         // local member

@@ -18,6 +18,5 @@ package com.github.lburgazzoli.atomix.boot;
 
 import io.atomix.core.AtomixConfig;
 
-public interface AtomixConfigurationCustomizer {
-    void customize(AtomixConfig config);
+public interface AtomixConfigurationCustomizer extends Customizer<AtomixConfig> {
 }

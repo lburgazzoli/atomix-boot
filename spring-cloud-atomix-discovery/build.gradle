@@ -1,3 +1,4 @@
 dependencies {
-    implementation project(':atomix-boot-starter-common')
+    implementation project(':spring-cloud-atomix-core')
+    implementation project(':spring-boot-atomix')
 }

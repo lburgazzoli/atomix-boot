@@ -30,7 +30,7 @@ public final class AtomixBoot implements Lifecycle {
     private final List<Listener> listeners;
 
     public AtomixBoot(Atomix atomix, List<Listener> listeners) {
-         this.atomix = atomix;
+        this.atomix = atomix;
         this.listeners = listeners;
     }
 
@@ -44,22 +44,6 @@ public final class AtomixBoot implements Lifecycle {
                     for (Listener listener: listeners) {
                         listener.started(atomix);
                     }
-
-                    /*
-                    if (!serviceId.isPresent() || !nodeRegistry.isPresent()) {
-                        return;
-                    }
-
-                    //atomix.membershipService().getLocalMember().
-                    final Member member = atomix.membershipService().getLocalMember();
-                    final AtomixBootRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
-
-                    try {
-                        nodeRegistry.get().register(registration);
-                    } catch (Exception e) {
-                        LOGGER.warn("Unable to register this node as service {}", registration, e);
-                    }
-                    */
                 }
             );
         }
@@ -76,20 +60,6 @@ public final class AtomixBoot implements Lifecycle {
                 }
             }
         );
-
-            /*
-
-        if (running.compareAndSet(true, false)) {
-            final Member member = atomix.membershipService().getLocalMember();
-            final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
-
-            if (nodeRegistry.isPresent()) {
-                nodeRegistry.get().deregister(registration);
-            }
-
-            atomix.stop();
-        }
-        */
     }
 
     @Override

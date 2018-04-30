@@ -1,4 +1,4 @@
 
 dependencies {
-    api project(':atomix-boot')
+    api project(':spring-boot-atomix')
 }

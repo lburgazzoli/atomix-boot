@@ -25,13 +25,11 @@ logging:
     com.github.lburgazzoli.atomix: DEBUG
 
 atomix:
-  node:
-    data-directory: ${java.io.tmpdir}/${atomix.node.local-node.id}
-    local-member:
-      id: ${spring.application.name}-${random.uuid}
-      type: EPHEMERAL
-      address: ${node.ip:localhost}:${node.port:8700}
-    cluster:
-      name: ${spring.application.name}
-    profiles:
-      - DATA_GRID
+  local-member:
+    id: ${spring.application.name}-${random.uuid}
+    type: EPHEMERAL
+    address: ${node.ip:localhost}:${node.port:8700}
+  cluster:
+    name: ${spring.application.name}
+  profiles:
+    - DATA_GRID

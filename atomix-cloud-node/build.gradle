@@ -1,7 +1,7 @@
 apply plugin: "org.springframework.boot"
 
 dependencies {
-    implementation project(':atomix-boot-starter-node')
+    implementation project(':spring-boot-starter-atomix')
     implementation project(':atomix-cloud-node-starter-consul')
     implementation project(':atomix-cloud-node-starter-zookeeper')
 

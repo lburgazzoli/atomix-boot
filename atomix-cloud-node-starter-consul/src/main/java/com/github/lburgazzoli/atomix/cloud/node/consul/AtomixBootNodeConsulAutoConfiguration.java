@@ -16,17 +16,21 @@
  */
 package com.github.lburgazzoli.atomix.cloud.node.consul;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import com.ecwid.consul.v1.agent.model.NewService;
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
-import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
-import com.github.lburgazzoli.atomix.boot.common.DelegatingAtomixBootNodeRegistry;
-import com.github.lburgazzoli.atomix.boot.node.AtomixBootNodeAutoConfiguration;
+import com.github.lburgazzoli.atomix.boot.AtomixBoot;
+import com.github.lburgazzoli.atomix.boot.AtomixBootAutoConfiguration;
+import com.github.lburgazzoli.atomix.boot.AtomixUtils;
+import io.atomix.cluster.Member;
+import io.atomix.core.Atomix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.consul.ConditionalOnConsulEnabled;
 import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.consul.serviceregistry.ConsulRegistration;
@@ -37,27 +41,65 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureAfter(ConsulServiceRegistryAutoConfiguration.class)
-@AutoConfigureBefore(AtomixBootNodeAutoConfiguration.class)
+@AutoConfigureBefore(AtomixBootAutoConfiguration.class)
 @ConditionalOnConsulEnabled
 public class AtomixBootNodeConsulAutoConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixBootNodeConsulAutoConfiguration.class);
+
     @Bean
-    @ConditionalOnMissingBean
     @ConditionalOnBean({ConsulServiceRegistry.class, ConsulDiscoveryProperties.class})
-    public AtomixBootNodeRegistry consulNodeRegistry(
+    public AtomixBoot.Listener registerAsConsulServiceListener(
             final ConsulServiceRegistry serviceRegistry,
             final ConsulDiscoveryProperties discoveryProperties) {
 
-        return new DelegatingAtomixBootNodeRegistry<>(serviceRegistry, registration -> {
+        return new AtomixBoot.Listener() {
+            @Override
+            public void started(Atomix atomix) {
+                final Member local = atomix.membershipService().getLocalMember();
+                final Optional<ConsulRegistration> registration = nativeRegistration(local, discoveryProperties);
+
+                registration.ifPresent(r -> {
+                    LOGGER.info("Register member: {} to registry: {}", local, serviceRegistry);
+                    serviceRegistry.register(r);
+                });
+            }
+
+            @Override
+            public void stopped(Atomix atomix) {
+                final Member local = atomix.membershipService().getLocalMember();
+                final Optional<ConsulRegistration> registration = nativeRegistration(local, discoveryProperties);
+
+                registration.ifPresent( r -> {
+                    LOGGER.info("De-register member: {} from registry: {}", local, serviceRegistry);
+                    serviceRegistry.deregister(r);
+                });
+
+            }
+        };
+    }
+
+    private static Optional<ConsulRegistration> nativeRegistration(Member member, ConsulDiscoveryProperties discoveryProperties)  {
+        return AtomixUtils.getClusterId(member)
+            .map(clusterId -> {
                 NewService service = new NewService();
-                service.setId(registration.getMetadata().get(AtomixBootUtils.META_NODE_ID));
-                service.setName(registration.getServiceId());
-                service.setAddress(registration.getHost());
-                service.setPort(registration.getPort());
-                service.setTags(
-                    registration.getMetadata().entrySet().stream()
-                        .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
-                        .collect(Collectors.toList())
-                );
+                service.setId(member.id().id());
+                service.setName(clusterId);
+                service.setAddress(member.address().host());
+                service.setPort(member.address().port());
+
+                // add tags
+                List<String> tags = new ArrayList<>();
+
+                // extract simple tags
+                AtomixUtils.getTags(member).stream()
+                    .forEach(tags::add);
+
+                // transform metadata to tags
+                AtomixUtils.getMeta(member).entrySet().stream()
+                    .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+                    .forEach(tags::add);
+
+                service.setTags(tags);
 
                 return new ConsulRegistration(service, discoveryProperties);
             }
