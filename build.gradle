@@ -11,7 +11,6 @@ buildscript {
         classpath "com.github.ben-manes:gradle-versions-plugin:0.17.0"
         classpath "gradle.plugin.io.github.ddimtirov:codacy-gradle-plugin:0.1.0"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE"
-        classpath "com.bmuschko:gradle-docker-plugin:3.2.7"
     }
 }
 
@@ -40,7 +39,7 @@ ext {
     versions = [
         slf4j               : '1.7.25',
         snakeyaml           : '1.21',
-        atomix              : '2.1.0-beta3',
+        atomix              : '2.1.0-SNAPSHOT',
         validation_api      : '2.0.1.Final',
         hibernate_validator : '6.0.9.Final',
         spring_boot         : '2.0.1.RELEASE',
@@ -68,7 +67,11 @@ subprojects {
 
     repositories {
         maven {
-            url "https://repo.spring.io/libs-milestone"
+            url 'https://repo.spring.io/libs-milestone'
+        }
+
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
 
         mavenLocal()

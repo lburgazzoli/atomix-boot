@@ -20,18 +20,18 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
-import io.atomix.cluster.Node;
+import io.atomix.cluster.Member;
 import org.springframework.cloud.client.serviceregistry.Registration;
 
 public class AtomixBootNodeRegistration implements Registration {
     private final String clusterName;
-    private final Node node;
+    private final Member member;
     private final Map<String, String> meta;
 
-    public AtomixBootNodeRegistration(String clusterName, Node node) {
+    public AtomixBootNodeRegistration(String clusterName, Member member) {
         this.clusterName = clusterName;
-        this.node = node;
-        this.meta = Collections.unmodifiableMap(AtomixBootUtils.getMeta(node));
+        this.member = member;
+        this.meta = Collections.unmodifiableMap(AtomixBootUtils.getMeta(member));
     }
 
     @Override
@@ -41,12 +41,12 @@ public class AtomixBootNodeRegistration implements Registration {
 
     @Override
     public String getHost() {
-        return node.address().host();
+        return member.address().host();
     }
 
     @Override
     public int getPort() {
-        return node.address().port();
+        return member.address().port();
     }
 
     @Override

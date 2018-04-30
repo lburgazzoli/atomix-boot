@@ -42,11 +42,16 @@ public class AtomixBootClientAutoConfiguration {
     @Bean(name = "atomix-client", initMethod = "start", destroyMethod = "stop")
     @ConditionalOnMissingBean(Atomix.class)
     public Atomix atomixClient() {
-        AtomixConfig config = new AtomixConfig();
-        config.setDataDirectory(configuration.getDataDirectory());
-        config.getClusterConfig().setLocalNode(configuration.getLocalNode());
+        final AtomixConfig config = new AtomixConfig();
+
+        // common conf
         config.getClusterConfig().setName(configuration.getCluster().getName());
-        config.getClusterConfig().setNodes(configuration.getCluster().getNodes());
+
+        // local member
+        config.getClusterConfig().setLocalMember(configuration.getLocalMember());
+
+        // first add statically configured nodes
+        configuration.getCluster().getMembers().forEach(config.getClusterConfig()::addMember);
 
         return Atomix.builder(config).build();
     }

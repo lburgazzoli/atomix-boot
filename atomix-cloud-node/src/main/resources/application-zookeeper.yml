@@ -1,0 +1,8 @@
+spring:
+  profiles: zookeeper
+  cloud:
+    zookeeper:
+      enabled: true
+      connect-string: localhost:2181
+      discovery:
+        enabled: true

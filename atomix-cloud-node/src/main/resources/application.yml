@@ -6,11 +6,9 @@ spring:
       auto-registration:
         enabled: false
     consul:
-      host: localhost
-      port: 8500
-      discovery:
-        enabled: true
-      enabled: true
+      enabled: false
+    zookeeper:
+      enabled: false
 
 server:
   port: 0
@@ -31,11 +29,9 @@ atomix:
     data-directory: ${java.io.tmpdir}/${atomix.node.local-node.id}
     local-node:
       id: ${spring.application.name}-${random.uuid}
-      type: core
+      type: EPHEMERAL
       address: ${node.ip:localhost}:${node.port:8700}
     cluster:
       name: ${spring.application.name}
-    partition-groups:
-      primary-backup:
-        - name: "pb"
-          partitions: 3
+    profiles:
+      - DATA_GRID

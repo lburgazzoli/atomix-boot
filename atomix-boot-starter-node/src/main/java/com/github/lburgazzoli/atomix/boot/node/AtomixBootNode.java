@@ -21,14 +21,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistration;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
-import io.atomix.cluster.Node;
+import io.atomix.cluster.Member;
 import io.atomix.core.Atomix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.Lifecycle;
 
 public final class AtomixBootNode implements Lifecycle {
-    private final static Logger LOGGER = LoggerFactory.getLogger(AtomixBootNode.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixBootNode.class);
 
     private final AtomicBoolean running;
     private final Atomix atomix;
@@ -47,16 +47,16 @@ public final class AtomixBootNode implements Lifecycle {
         if (running.compareAndSet(false, true)) {
             atomix.start().thenAccept(
                 a -> {
-                    LOGGER.info("Node {} started", atomix.clusterService().getLocalNode().id());
+                    LOGGER.info("Node {} started", atomix.membershipService().getLocalMember().id());
 
                     if (!serviceId.isPresent() || !nodeRegistry.isPresent()) {
                         return;
                     }
 
-                    final Node node = atomix.clusterService().getLocalNode();
-                    final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
+                    final Member member = atomix.membershipService().getLocalMember();
+                    final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
 
-                    LOGGER.info("Registering node {} to {}", node.id(), registration);
+                    LOGGER.info("Registering node {} to {}", member.id(), registration);
 
                     try {
                         nodeRegistry.get().register(registration);
@@ -71,8 +71,8 @@ public final class AtomixBootNode implements Lifecycle {
     @Override
     public void stop() {
         if (running.compareAndSet(true, false)) {
-            final Node node = atomix.clusterService().getLocalNode();
-            final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), node);
+            final Member member = atomix.membershipService().getLocalMember();
+            final AtomixBootNodeRegistration registration = new AtomixBootNodeRegistration(serviceId.get(), member);
 
             if (nodeRegistry.isPresent()) {
                 nodeRegistry.get().deregister(registration);

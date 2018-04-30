@@ -19,7 +19,8 @@ package com.github.lburgazzoli.atomix.boot.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.atomix.cluster.Node;
+import io.atomix.cluster.Member;
+
 
 public final class AtomixBootUtils {
     public static final String META_NODE_ID = "atomix.node.id";
@@ -33,16 +34,16 @@ public final class AtomixBootUtils {
     private AtomixBootUtils() {
     }
 
-    public static Map<String, String>  getMeta(Node node) {
+    public static Map<String, String>  getMeta(Member member) {
         final Map<String, String> meta = new HashMap<>();
 
-        putIfNotNull(meta ,META_NODE_ADDRESS_HOST, node.address().host());
-        putIfNotNull(meta ,META_NODE_ADDRESS_PORT, Integer.toString(node.address().port()));
-        putIfNotNull(meta ,META_NODE_HOST, node.host());
-        putIfNotNull(meta ,META_NODE_RACK, node.rack());
-        putIfNotNull(meta ,META_NODE_ZONE, node.zone());
-        putIfNotNull(meta ,META_NODE_TYPE, node.type().name());
-        putIfNotNull(meta ,META_NODE_ID, node.id().id());
+        putIfNotNull(meta ,META_NODE_ADDRESS_HOST, member.address().host());
+        putIfNotNull(meta ,META_NODE_ADDRESS_PORT, Integer.toString(member.address().port()));
+        putIfNotNull(meta ,META_NODE_HOST, member.host());
+        putIfNotNull(meta ,META_NODE_RACK, member.rack());
+        putIfNotNull(meta ,META_NODE_ZONE, member.zone());
+        putIfNotNull(meta ,META_NODE_TYPE, member.type().name());
+        putIfNotNull(meta ,META_NODE_ID, member.id().id());
 
         return meta;
     }

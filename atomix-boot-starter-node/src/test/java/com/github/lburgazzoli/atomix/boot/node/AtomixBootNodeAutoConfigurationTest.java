@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import io.atomix.cluster.Node;
+import io.atomix.cluster.Member;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -59,11 +59,10 @@ public class AtomixBootNodeAutoConfigurationTest {
                 .withPropertyValues(
                     "debug=false",
                     "spring.main.banner-mode=off",
-                    "atomix.node.local-node.id=" + UUID.randomUUID().toString(),
-                    "atomix.node.local-node.type=" + Node.Type.CORE.name(),
-                    "atomix.node.local-node.address=localhost:" + SocketUtils.findAvailableTcpPort(),
+                    "atomix.node.local-member.id=" + UUID.randomUUID().toString(),
+                    "atomix.node.local-member.type=" + Member.Type.EPHEMERAL.name(),
+                    "atomix.node.local-member.address=localhost:" + SocketUtils.findAvailableTcpPort(),
                     "atomix.node.cluster.name=" + "cluster",
-                    "atomix.node.data-directory=" + tmp.toFile().getAbsolutePath(),
                     "atomix.node.partition-groups.raft[0].name=" + "raft",
                     "atomix.node.partition-groups.raft[0].partitions=" + "3",
                     "atomix.node.partition-groups.raft[0].partition-size=" + "3")

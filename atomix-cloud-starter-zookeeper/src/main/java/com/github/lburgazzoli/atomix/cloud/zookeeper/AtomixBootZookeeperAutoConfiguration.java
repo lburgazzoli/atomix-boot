@@ -20,8 +20,6 @@ import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
 import com.github.lburgazzoli.atomix.boot.common.DelegatingAtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.node.AtomixBootNodeAutoConfiguration;
-import org.apache.curator.x.discovery.ServiceInstance;
-import org.apache.curator.x.discovery.ServiceInstanceBuilder;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -48,24 +46,19 @@ public class AtomixBootZookeeperAutoConfiguration {
             final ZookeeperDiscoveryProperties discoveryProperties) {
 
         return new DelegatingAtomixBootNodeRegistry<>(serviceRegistry, registration -> {
-            try {
-                ServiceInstanceBuilder<ZookeeperInstance> builder = ServiceInstance.<ZookeeperInstance>builder();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            ZookeeperInstance instance = new ZookeeperInstance(
+                registration.getMetadata().get(AtomixBootUtils.META_NODE_ID),
+                registration.getServiceId(),
+                registration.getMetadata()
+            );
 
-                    /*
-                ServiceInstanceRegistration.RegistrationBuilder builder = ServiceInstanceRegistration.builder();
-
-                builder.id(registration.getMetadata().get(AtomixBootUtils.META_NODE_ID));
-                builder.name(registration.getServiceId());
-                builder.address(registration.getHost());
-                builder.port(registration.getPort());
-                builder.uriSpec(discoveryProperties.getUriSpec());
-
-                return builder.build();
-                */
-                    return null;
+            return ServiceInstanceRegistration.builder()
+                .address(registration.getHost())
+                .port(registration.getPort())
+                .name(registration.getServiceId())
+                .payload(instance)
+                .uriSpec(discoveryProperties.getUriSpec())
+                .build();
             }
         );
     }

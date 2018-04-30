@@ -16,17 +16,14 @@
  */
 package com.github.lburgazzoli.atomix.boot.node;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootNodeRegistry;
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootUtils;
-import io.atomix.cluster.Node;
-import io.atomix.cluster.NodeConfig;
+import io.atomix.cluster.Member;
+import io.atomix.cluster.MemberConfig;
 import io.atomix.core.Atomix;
 import io.atomix.core.AtomixConfig;
-import io.atomix.primitive.partition.PartitionGroupConfig;
 import io.atomix.utils.net.Address;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,43 +54,46 @@ public class AtomixBootNodeAutoConfiguration {
     @ConditionalOnMissingBean(AtomixBootNode.class)
     public AtomixBootNode atomixNode() {
         final String clusterName = configuration.getCluster().getName();
-        final List<NodeConfig> clusterNodes = new ArrayList<>();
+        final AtomixConfig config = new AtomixConfig();
 
-        // local node
-        clusterNodes.add(configuration.getLocalNode());
+        // common conf
+        config.getClusterConfig().setLocalMember(configuration.getLocalMember());
+        config.getClusterConfig().setName(configuration.getCluster().getName());
+
+        // local member
+        config.getClusterConfig().addMember(configuration.getLocalMember());
 
         // first add statically configured nodes
-        clusterNodes.addAll(configuration.getCluster().getNodes());
+        configuration.getCluster().getMembers().forEach(config.getClusterConfig()::addMember);
 
         // then use DiscoveryClient to discovery additional nodes
         if (discoveryClient != null && clusterName != null) {
             for (ServiceInstance instance: discoveryClient.getInstances(clusterName)) {
-                String type = instance.getMetadata().getOrDefault(AtomixBootUtils.META_NODE_TYPE, "CORE");
-                String id = instance.getMetadata().get(AtomixBootUtils.META_NODE_ID);
+                final String id = instance.getMetadata().get(AtomixBootUtils.META_NODE_ID);
+                final String type = instance.getMetadata().get(AtomixBootUtils.META_NODE_TYPE);
 
-                NodeConfig nodeConfig = new NodeConfig();
-                nodeConfig.setAddress(Address.from(instance.getHost(), instance.getPort()));
-                nodeConfig.setType(Node.Type.valueOf(type));
-
-                if (id != null) {
-                    nodeConfig.setId(id);
+                if (type == null) {
+                    continue;
                 }
 
-                clusterNodes.add(nodeConfig);
+                MemberConfig memberConfig = new MemberConfig();
+                memberConfig.setAddress(Address.from(instance.getHost(), instance.getPort()));
+                memberConfig.setType(Member.Type.valueOf(type));
+
+                if (id != null) {
+                    memberConfig.setId(id);
+                }
+
+                config.getClusterConfig().addMember(memberConfig);
             }
         }
 
-        AtomixConfig config = new AtomixConfig();
-        config.setDataDirectory(configuration.getDataDirectory());
-        config.getClusterConfig().setLocalNode(configuration.getLocalNode());
-        config.getClusterConfig().setName(configuration.getCluster().getName());
-        config.getClusterConfig().setNodes(clusterNodes);
+        // Partitions
+        configuration.getPartitionGroups().getRaft().forEach(config::addPartitionGroup);
+        configuration.getPartitionGroups().getPrimaryBackup().forEach(config::addPartitionGroup);
 
-        List<PartitionGroupConfig> partitions = new ArrayList<>();
-        configuration.getPartitionGroups().getRaft().forEach(partitions::add);
-        configuration.getPartitionGroups().getPrimaryBackup().forEach(partitions::add);
-
-        config.setPartitionGroups(partitions);
+        // Profiles
+        configuration.getProfiles().stream().map(AtomixBootNodeConfiguration.Profile::value).forEach(config::addProfile);
 
         return new AtomixBootNode(
             Atomix.builder(config).build(),

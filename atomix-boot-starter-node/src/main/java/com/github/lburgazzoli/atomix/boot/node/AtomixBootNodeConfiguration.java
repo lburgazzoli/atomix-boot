@@ -18,7 +18,6 @@ package com.github.lburgazzoli.atomix.boot.node;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import javax.validation.Valid;
 
 import com.github.lburgazzoli.atomix.boot.common.AtomixBootConfiguration;
@@ -31,10 +30,35 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties("atomix.node")
 public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
+    enum Profile {
+        CONSENSUS(io.atomix.core.profile.Profile.CONSENSUS),
+        DATA_GRID(io.atomix.core.profile.Profile.DATA_GRID),
+        CLIENT(io.atomix.core.profile.Profile.CLIENT);
+
+        private io.atomix.core.profile.Profile value;
+
+        Profile(io.atomix.core.profile.Profile value) {
+            this.value = value;
+        }
+
+        io.atomix.core.profile.Profile value() {
+            return value;
+        }
+    }
+
+    private List<Profile> profiles = new ArrayList<>();
+
     @Valid
-    @Nonnull
     @NestedConfigurationProperty
-    public PartitionsGroups partitionGroups;
+    private PartitionsGroups partitionGroups;
+
+    public List<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(List<Profile> profiles) {
+        this.profiles = profiles;
+    }
 
     public PartitionsGroups getPartitionGroups() {
         return partitionGroups;
@@ -45,16 +69,17 @@ public class AtomixBootNodeConfiguration extends AtomixBootConfiguration {
         this.partitionGroups = partitionGroups;
     }
 
+
     public static class PartitionsGroups {
         /**
          * Raft partitions.
          */
-        public List<RaftPartitionGroupConfig> raft = new ArrayList<>();
+        private List<RaftPartitionGroupConfig> raft = new ArrayList<>();
 
         /**
          * PrimaryBackup partitions.
          */
-        public List<PrimaryBackupPartitionGroupConfig> primaryBackup = new ArrayList<>();
+        private List<PrimaryBackupPartitionGroupConfig> primaryBackup = new ArrayList<>();
 
         public List<RaftPartitionGroupConfig> getRaft() {
             return raft;

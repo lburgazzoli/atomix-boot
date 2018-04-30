@@ -16,29 +16,24 @@
  */
 package com.github.lburgazzoli.atomix.boot.common;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
-import io.atomix.cluster.NodeConfig;
+import io.atomix.cluster.MemberConfig;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 public abstract class AtomixBootConfiguration {
     private boolean enabled = true;
 
     @Valid
-    @Nonnull
+    @NotNull
     @NestedConfigurationProperty
-    private NodeConfig localNode;
-
-    @Nullable
-    private File dataDirectory;
+    private MemberConfig localMember;
 
     @Valid
-    @Nonnull
+    @NotNull
     @NestedConfigurationProperty
     private Cluster cluster;
 
@@ -54,12 +49,12 @@ public abstract class AtomixBootConfiguration {
         this.enabled = enabled;
     }
 
-    public NodeConfig getLocalNode() {
-        return localNode;
+    public MemberConfig getLocalMember() {
+        return localMember;
     }
 
-    public void setLocalNode(NodeConfig localNode) {
-        this.localNode = localNode;
+    public void setLocalMember(MemberConfig localMember) {
+        this.localMember = localMember;
     }
 
     public Cluster getCluster() {
@@ -70,14 +65,6 @@ public abstract class AtomixBootConfiguration {
         this.cluster = cluster;
     }
 
-    public File getDataDirectory() {
-        return dataDirectory;
-    }
-
-    public void setDataDirectory(File dataDirectory) {
-        this.dataDirectory = dataDirectory;
-    }
-
     // ***************
     //
     // ***************
@@ -86,13 +73,13 @@ public abstract class AtomixBootConfiguration {
         /**
          * The name of the cluster.
          */
-        @Nonnull
-        public String name;
+        @NotNull
+        private String name;
 
         /**
          * The nodes composing the cluster.
          */
-        public List<NodeConfig> nodes = new ArrayList<>();
+        private List<MemberConfig> members = new ArrayList<>();
 
         public String getName() {
             return name;
@@ -102,12 +89,12 @@ public abstract class AtomixBootConfiguration {
             this.name = name;
         }
 
-        public List<NodeConfig> getNodes() {
-            return nodes;
+        public List<MemberConfig> getMembers() {
+            return members;
         }
 
-        public void setNodes(List<NodeConfig> nodes) {
-            this.nodes = nodes;
+        public void setMembers(List<MemberConfig> members) {
+            this.members = members;
         }
     }
 }
