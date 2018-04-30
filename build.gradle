@@ -127,5 +127,7 @@ subprojects {
 
     pmd {
         consoleOutput = true
+        //toolVersion = '6.3.0'
+        ruleSetConfig = resources.text.fromFile("${rootProject.projectDir}/etc/pmd/rules.xml")
     }
 }
