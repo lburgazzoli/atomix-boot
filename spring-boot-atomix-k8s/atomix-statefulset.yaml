@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: atomix
+spec:
+  serviceName: "atomix"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: atomix
+  template:
+    metadata:
+      labels:
+        app: atomix
+    spec:
+      containers:
+      - name: latomix
+        image: lburgazzoli:3.0.0

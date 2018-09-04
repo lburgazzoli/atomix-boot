@@ -1,7 +1,8 @@
-package com.github.lburgazzoli.atomix.boot;
+package com.github.lburgazzoli.atomix.autoconfigure;
 
 import java.util.List;
 
+import com.github.lburgazzoli.atomix.boot.AtomixInstance;
 import io.atomix.core.Atomix;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

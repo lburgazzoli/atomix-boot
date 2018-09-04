@@ -1,4 +1,4 @@
-package com.github.lburgazzoli.atomix.boot;
+package com.github.lburgazzoli.atomix.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -7,8 +7,8 @@ public class AtomixConfiguration {
     /**
      * enable/disable.
      */
-
     private boolean enabled = true;
+
     /**
      * the configuration path
      */
