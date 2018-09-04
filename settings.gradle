@@ -1,17 +1,5 @@
 rootProject.name = 'atomix-boot'
 
-
 // spring-boot
 include ':spring-boot-atomix'
 include ':spring-boot-starter-atomix'
-
-// cloud
-include ':atomix-cloud-node-starter-consul'
-include ':atomix-cloud-node-starter-zookeeper'
-include ':atomix-cloud-node'
-
-// spring-cloud
-include ':spring-cloud-atomix-core'
-include ':spring-cloud-atomix-config'
-include ':spring-cloud-atomix-discovery'
-include ':spring-cloud-atomix-binder'

@@ -23,13 +23,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.Lifecycle;
 
-public final class AtomixBoot implements Lifecycle {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixBoot.class);
+public final class AtomixInstance implements Lifecycle {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixInstance.class);
 
     private final Atomix atomix;
     private final List<Listener> listeners;
 
-    public AtomixBoot(Atomix atomix, List<Listener> listeners) {
+    public AtomixInstance(Atomix atomix, List<Listener> listeners) {
         this.atomix = atomix;
         this.listeners = listeners;
     }
@@ -39,7 +39,7 @@ public final class AtomixBoot implements Lifecycle {
         if (!atomix.isRunning()) {
             atomix.start().thenAccept(
                 a -> {
-                    LOGGER.info("Node {} started", atomix.membershipService().getLocalMember().id());
+                    LOGGER.info("Node {} started", atomix.getMembershipService().getLocalMember().id());
 
                     for (Listener listener: listeners) {
                         listener.started(atomix);
@@ -53,7 +53,7 @@ public final class AtomixBoot implements Lifecycle {
     public void stop() {
         atomix.stop().thenAccept(
             a -> {
-                LOGGER.info("Node {} stopped", atomix.membershipService().getLocalMember().id());
+                LOGGER.info("Node {} stopped", atomix.getMembershipService().getLocalMember().id());
 
                 for (Listener listener: listeners) {
                     listener.stopped(atomix);

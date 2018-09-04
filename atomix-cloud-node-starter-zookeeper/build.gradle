@@ -1,4 +1,0 @@
-dependencies {
-    implementation project(':spring-boot-starter-atomix')
-    implementation "org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:$versions.spring_consul"
-}

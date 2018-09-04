@@ -40,10 +40,10 @@ public class AtomixBootAutoConfiguration {
 
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix", initMethod = "start", destroyMethod = "stop")
-    @ConditionalOnMissingBean(AtomixBoot.class)
-    public AtomixBoot atomix(
+    @ConditionalOnMissingBean(AtomixInstance.class)
+    public AtomixInstance atomix(
             AtomixBootConfiguration configuration,
-            Optional<List<AtomixBoot.Listener>> listeners,
+            Optional<List<AtomixInstance.Listener>> listeners,
             Optional<List<AtomixConfigurationCustomizer>> customizers) {
 
         final AtomixConfig config;
@@ -103,7 +103,7 @@ public class AtomixBootAutoConfiguration {
             }
         });
 
-        return new AtomixBoot(
+        return new AtomixInstance(
             Atomix.builder(config).build(),
             listeners.orElseGet(Collections::emptyList)
         );

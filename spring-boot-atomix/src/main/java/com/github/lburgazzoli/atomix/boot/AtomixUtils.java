@@ -17,18 +17,14 @@
 package com.github.lburgazzoli.atomix.boot;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import io.atomix.cluster.Member;
 
 
 public final class AtomixUtils {
     public static final String META_MEMBER_ID = "atomix.member.id";
-    public static final String META_MEMBER_TYPE = "atomix.member.type";
     public static final String META_MEMBER_ZONE = "atomix.member.zone";
     public static final String META_MEMBER_RACK = "atomix.member.rack";
     public static final String META_MEMBER_HOST = "atomix.member.host";
@@ -39,20 +35,6 @@ public final class AtomixUtils {
     private AtomixUtils() {
     }
 
-    public static Optional<String> getClusterId(Member member) {
-        for (String tag : member.tags()) {
-            String[] items = tag.split("=");
-
-            if (items.length == 2) {
-                if (Objects.equals(META_MEMBER_CLUSTER_ID, items[0])) {
-                    return Optional.of(items[1]);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
     public static Map<String, String> getMeta(Member member) {
         final Map<String, String> meta = new HashMap<>();
 
@@ -61,32 +43,19 @@ public final class AtomixUtils {
         putIfNotNull(meta, META_MEMBER_HOST, member.host());
         putIfNotNull(meta, META_MEMBER_RACK, member.rack());
         putIfNotNull(meta, META_MEMBER_ZONE, member.zone());
-        putIfNotNull(meta, META_MEMBER_TYPE, member.type().name());
         putIfNotNull(meta, META_MEMBER_ID, member.id().id());
 
-        for (String tag : member.tags()) {
-            String[] items = tag.split("=");
-
-            if (items.length == 2) {
-                putIfNotNull(meta, items[0], items[1]);
-            }
-        }
+        member.properties().stringPropertyNames().forEach(
+            name -> putIfNotNull(meta, name, member.properties().getProperty(name))
+        );
 
         return meta;
     }
 
-    public static Set<String> getTags(Member member) {
-        final Set<String> tags = new HashSet<>();
-
-        for (String tag : member.tags()) {
-            String[] items = tag.split("=");
-
-            if (items.length == 1) {
-                tags.add(tag);
-            }
-        }
-
-        return tags;
+    public static Optional<String> getClusterId(Member member) {
+        return Optional.ofNullable(
+            member.properties().getProperty(META_MEMBER_CLUSTER_ID)
+        );
     }
 
     public static <K, V> void putIfNotNull(Map<K, V> map, K key, V val) {

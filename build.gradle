@@ -39,14 +39,12 @@ ext {
     versions = [
         slf4j               : '1.7.25',
         snakeyaml           : '1.21',
-        atomix              : '2.1.0-SNAPSHOT',
+        atomix              : '3.0.3',
         validation_api      : '2.0.1.Final',
         hibernate_validator : '6.0.9.Final',
-        spring_boot         : '2.0.1.RELEASE',
-        spring_cloud        : '2.0.0.RC1',
-        spring_consul       : '2.0.0.RC1',
-        junit_jupiter       : '5.2.0',
-        assertj             : '3.9.1',
+        spring_boot         : '2.0.4.RELEASE',
+        junit_jupiter       : '5.3.0',
+        assertj             : '3.11.1',
     ]
 }
 
@@ -92,12 +90,15 @@ subprojects {
 
         api "io.atomix:atomix:$versions.atomix"
         api "io.atomix:atomix-raft:$versions.atomix"
+        api "io.atomix:atomix-gossip:$versions.atomix"
+        api "io.atomix:atomix-primitive:$versions.atomix"
+        api "io.atomix:atomix-storage:$versions.atomix"
+        api "io.atomix:atomix-utils:$versions.atomix"
         api "io.atomix:atomix-primary-backup:$versions.atomix"
 
         api "org.springframework.boot:spring-boot:$versions.spring_boot"
         api "org.springframework.boot:spring-boot-autoconfigure:$versions.spring_boot"
         api "org.springframework.boot:spring-boot-actuator:$versions.spring_boot"
-        api "org.springframework.cloud:spring-cloud-commons:$versions.spring_cloud"
 
         annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:$versions.spring_boot"
 
@@ -118,7 +119,7 @@ subprojects {
     checkstyle {
         configDir = file("${rootProject.projectDir}/etc/checkstyle")
     }
-    
+
     jacocoTestReport {
         reports {
             xml.enabled true
