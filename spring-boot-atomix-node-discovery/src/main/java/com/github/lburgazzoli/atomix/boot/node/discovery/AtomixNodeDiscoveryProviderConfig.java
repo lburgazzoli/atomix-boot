@@ -74,4 +74,16 @@ public class AtomixNodeDiscoveryProviderConfig extends NodeDiscoveryConfig {
     public NodeDiscoveryProvider.Type getType() {
         return AtomixNodeDiscoveryProvider.TYPE;
     }
+
+    @Override
+    public String toString() {
+        return "AtomixNodeDiscoveryProviderConfig{" +
+            "namespace='" + namespace + '\'' +
+            ", portName='" + portName + '\'' +
+            ", portProtocol='" + portProtocol + '\'' +
+            ", zone='" + zone + '\'' +
+            ", domain='" + domain + '\'' +
+            ", serviceName='" + serviceName + '\'' +
+            '}';
+    }
 }

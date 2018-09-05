@@ -30,6 +30,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import io.atomix.cluster.BootstrapService;
 import io.atomix.cluster.Node;
@@ -129,6 +130,8 @@ public class AtomixNodeDiscoveryProvider
     //
     // ************************
 
+    // TODO: pre-compute the query
+    // TODO: allow to configure timeout
     private void watch() {
         String namespace = config.getNamespace() != null ? config.getNamespace() : System.getenv("KUBERNETES_NAMESPACE");
         String portName = config.getPortName();
@@ -143,7 +146,6 @@ public class AtomixNodeDiscoveryProvider
         Objects.nonNull(zone);
 
         try {
-
             final String query = String.format("_%s._%s.%s.%s.svc.%s",
                 portName,
                 portProtocol,
@@ -152,28 +154,22 @@ public class AtomixNodeDiscoveryProvider
                 zone
             );
 
-            LOGGER.info("config={}, query={}", config, query);
-
             final DirContext ctx = new InitialDirContext(ENV);
             final NamingEnumeration<?> resolved = ctx.getAttributes(query, ATTRIBUTE_IDS).get("srv").getAll();
 
-            if (resolved.hasMore()) {
+            while (resolved.hasMore()) {
+                String record = (String)resolved.next();
+                String[] items = record.split(" ", -1);
+                String host = items[3].trim();
+                String port = items[2].trim();
+                String id = Splitter.on('.').splitToList(host).get(0);
 
-                while (resolved.hasMore()) {
-                    String record = (String)resolved.next();
-                    String[] items = record.split(" ", -1);
-                    String host = items[3].trim();
-                    String port = items[2].trim();
+                Node node = Node.builder().withAddress(host, Integer.parseInt(port)).withId(id).build();
 
-                    Node node = Node.builder().withAddress(host, Integer.parseInt(port)).withId(host).build();
-
-                    if (nodes.putIfAbsent(node.address(), node) == null) {
-                        LOGGER.info("Node added: {}", node);
-                        post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, node));
-                    }
+                if (nodes.putIfAbsent(node.address(), node) == null) {
+                    LOGGER.info("Node added: {}", node);
+                    post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, node));
                 }
-            } else {
-                LOGGER.warn("Could not find any service for name={}, query={}", serviceName, query);
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not resolve services via DNSSRV", e);
