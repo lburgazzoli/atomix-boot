@@ -7,4 +7,5 @@ include ':spring-boot-atomix-dependencies'
 include ':spring-boot-starter-atomix'
 
 // k8s
+include ':spring-boot-atomix-node-discovery'
 include ':spring-boot-atomix-node'

@@ -8,6 +8,7 @@ configurations {
 dependencies {
     implementation project(':spring-boot-atomix')
     implementation project(':spring-boot-atomix-autoconfigure')
+    implementation project(':spring-boot-atomix-node-discovery')
     implementation "org.springframework.boot:spring-boot-starter-web:$versions.spring_boot"
     implementation "org.springframework.boot:spring-boot-starter-undertow:$versions.spring_boot"
 }
@@ -16,7 +17,7 @@ docker {
     springBootApplication {
         baseImage = 'jboss/base-jdk:8'
         ports = [ 5679 ]
-        tag = "lburgazzoli/atomix-boot:3"
+        tag = "lburgazzoli/atomix-boot:3.0.3"
     }
 }
 

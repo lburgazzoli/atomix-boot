@@ -51,7 +51,7 @@ public class AtomixAutoConfiguration {
         final String clusterId = configuration.getClusterId();
         final String memberId = configuration.getMember().getId();
 
-        final Atomix atomix = Atomix.builder()
+        final Atomix atomix = Atomix.builder(Thread.currentThread().getContextClassLoader())
             .withClusterId(clusterId)
             .withMemberId(memberId)
             .withAddress(configuration.getMember().getHost(), configuration.getMember().getPort())

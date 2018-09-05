@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.lburgazzoli.atomix.boot.node.autoconfigure;
+package com.github.lburgazzoli.atomix.boot.node.discovery;
 
 import java.util.List;
 import java.util.Map;
@@ -44,14 +44,14 @@ import io.fabric8.kubernetes.client.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class AtomixNodeDiscoveryProvider
+public class AtomixNodeDiscoveryProvider
     extends AbstractListenerManager<NodeDiscoveryEvent, NodeDiscoveryEventListener>
     implements NodeDiscoveryProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AtomixNodeDiscoveryProvider.class);
-    private static final Type TYPE = new Type();
+    public static final NodeDiscoveryProvider.Type TYPE = new AtomixNodeDiscoveryProviderType();
 
-    private final Config config;
+    private final AtomixNodeDiscoveryProviderConfig config;
     private final Map<Address, Node> nodes;
     private final NamespacedKubernetesClient client;
     private final AtomicBoolean watching;
@@ -59,7 +59,7 @@ class AtomixNodeDiscoveryProvider
     private Watch watch;
     private BootstrapService bootstrap;
 
-    public AtomixNodeDiscoveryProvider(Config config) {
+    public AtomixNodeDiscoveryProvider(AtomixNodeDiscoveryProviderConfig config) {
         this.config = config;
         this.nodes = new ConcurrentHashMap<>();
         this.watching = new AtomicBoolean();
@@ -68,34 +68,21 @@ class AtomixNodeDiscoveryProvider
 
     @Override
     public Set<Node> getNodes() {
-        if (watching.compareAndSet(false, true)) {
-            // subscribe to events
-            watch = client.endpoints().inNamespace(config.namnespace).withName(config.endpointName).watch(new Watcher<Endpoints>() {
-                @Override
-                public void eventReceived(Action action, Endpoints resource) {
-                    handle(action, resource);
-                }
-
-                @Override
-                public void onClose(KubernetesClientException cause) {
-                    handle(Action.ERROR, null);
-                }
-            });
-        }
-
-        handle(
-            Watcher.Action.MODIFIED,
-            client.endpoints().inNamespace(config.namnespace).withName(config.endpointName).get()
-        );
+        LOGGER.info("============= getNodes ===============");
+        
+        watch();
 
         return ImmutableSet.copyOf(nodes.values());
     }
 
     @Override
     public CompletableFuture<Void> join(BootstrapService bootstrap, Node localNode) {
+        LOGGER.info("============= join ===============");
         if (nodes.putIfAbsent(localNode.address(), localNode) == null) {
             this.bootstrap = bootstrap;
             post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, localNode));
+
+            watch();
         }
 
         return CompletableFuture.completedFuture(null);
@@ -103,6 +90,7 @@ class AtomixNodeDiscoveryProvider
 
     @Override
     public CompletableFuture<Void> leave(Node localNode) {
+        LOGGER.info("============= leave ===============");
         if (nodes.remove(localNode.address()) != null) {
             post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.LEAVE, localNode));
             LOGGER.info("Left");
@@ -121,66 +109,6 @@ class AtomixNodeDiscoveryProvider
     @Override
     public NodeDiscoveryConfig config() {
         return config;
-    }
-
-    /**
-     * Discovery Type
-     */
-    public static class Type implements NodeDiscoveryProvider.Type<Config> {
-        private static final String NAME = "kubernetes";
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Config newConfig() {
-            return new Config();
-        }
-
-        @Override
-        public NodeDiscoveryProvider newProvider(Config config) {
-            return new AtomixNodeDiscoveryProvider(config);
-        }
-    }
-
-    /**
-     * Discovery Config
-     */
-    public static class Config extends NodeDiscoveryConfig {
-        private String namnespace;
-        private String endpointName;
-        private String portName;
-
-        public String getNamnespace() {
-            return namnespace;
-        }
-
-        public void setNamnespace(String namnespace) {
-            this.namnespace = namnespace;
-        }
-
-        public String getEndpointName() {
-            return endpointName;
-        }
-
-        public void setEndpointName(String endpointName) {
-            this.endpointName = endpointName;
-        }
-
-        public String getPortName() {
-            return portName;
-        }
-
-        public void setPortName(String portName) {
-            this.portName = portName;
-        }
-
-        @Override
-        public NodeDiscoveryProvider.Type getType() {
-            return TYPE;
-        }
     }
 
     // ************************
@@ -225,9 +153,33 @@ class AtomixNodeDiscoveryProvider
             Node node = Node.builder().withAddress(nodeAddress).withId(ea.getHostname()).build();
 
             if (nodes.putIfAbsent(nodeAddress, node) == null) {
+                LOGGER.info("Node added: {}", node);
                 post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, node));
             }
         }
+    }
+
+    private void watch() {
+        if (watching.compareAndSet(false, true)) {
+            // subscribe to events
+            watch = client.endpoints().inNamespace(config.getNamnespace()).withName(config.getEndpointName()).watch(new Watcher<Endpoints>() {
+                @Override
+                public void eventReceived(Action action, Endpoints resource) {
+                    LOGGER.info("event: action:{}, resource={}", action, resource);
+                    handle(action, resource);
+                }
+
+                @Override
+                public void onClose(KubernetesClientException cause) {
+                    handle(Action.ERROR, null);
+                }
+            });
+        }
+
+        handle(
+            Watcher.Action.MODIFIED,
+            client.endpoints().inNamespace(config.getNamnespace()).withName(config.getEndpointName()).get()
+        );
     }
 
 

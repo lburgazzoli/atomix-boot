@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':spring-boot-atomix')
+    implementation project(':spring-boot-atomix-autoconfigure')
+}
+
+
