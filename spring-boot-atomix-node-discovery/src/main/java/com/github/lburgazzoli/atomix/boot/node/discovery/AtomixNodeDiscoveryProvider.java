@@ -144,7 +144,6 @@ public class AtomixNodeDiscoveryProvider
 
         try {
 
-
             final String query = String.format("_%s._%s.%s.%s.svc.%s",
                 portName,
                 portProtocol,
@@ -152,6 +151,8 @@ public class AtomixNodeDiscoveryProvider
                 namespace,
                 zone
             );
+
+            LOGGER.info("config={}, query={}", config, query);
 
             final DirContext ctx = new InitialDirContext(ENV);
             final NamingEnumeration<?> resolved = ctx.getAttributes(query, ATTRIBUTE_IDS).get("srv").getAll();
@@ -164,7 +165,7 @@ public class AtomixNodeDiscoveryProvider
                     String host = items[3].trim();
                     String port = items[2].trim();
 
-                    Node node = Node.builder().withAddress(host, Integer.parseInt(port)).withId("").build();
+                    Node node = Node.builder().withAddress(host, Integer.parseInt(port)).withId(host).build();
 
                     if (nodes.putIfAbsent(node.address(), node) == null) {
                         LOGGER.info("Node added: {}", node);
