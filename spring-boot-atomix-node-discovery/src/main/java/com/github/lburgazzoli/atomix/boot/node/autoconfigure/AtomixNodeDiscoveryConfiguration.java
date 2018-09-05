@@ -16,36 +16,17 @@
  */
 package com.github.lburgazzoli.atomix.boot.node.autoconfigure;
 
-import javax.validation.constraints.NotNull;
-
+import com.github.lburgazzoli.atomix.boot.node.discovery.AtomixNodeDiscoveryProviderConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "atomix.discovery.k8s")
-public class AtomixNodeDiscoveryConfiguration {
+public class AtomixNodeDiscoveryConfiguration extends AtomixNodeDiscoveryProviderConfig {
     /**
      * enable/disable.
      */
     private boolean enabled = true;
-
-    /**
-     * The namespace;
-     */
-    @NotNull
-    private String namespace;
-
-    /**
-     * The name.
-     */
-    @NotNull
-    private String endpointName;
-
-    /**
-     * The port name.
-     */
-    private String portName;
-
 
     public boolean isEnabled() {
         return enabled;
@@ -53,30 +34,6 @@ public class AtomixNodeDiscoveryConfiguration {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getEndpointName() {
-        return endpointName;
-    }
-
-    public void setEndpointName(String endpointName) {
-        this.endpointName = endpointName;
-    }
-
-    public String getPortName() {
-        return portName;
-    }
-
-    public void setPortName(String portName) {
-        this.portName = portName;
     }
 }
 

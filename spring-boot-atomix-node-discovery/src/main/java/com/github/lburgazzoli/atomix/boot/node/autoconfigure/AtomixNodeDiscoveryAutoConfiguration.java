@@ -18,7 +18,6 @@ package com.github.lburgazzoli.atomix.boot.node.autoconfigure;
 
 import com.github.lburgazzoli.atomix.boot.autoconfigure.AtomixAutoConfiguration;
 import com.github.lburgazzoli.atomix.boot.node.discovery.AtomixNodeDiscoveryProvider;
-import com.github.lburgazzoli.atomix.boot.node.discovery.AtomixNodeDiscoveryProviderConfig;
 import io.atomix.cluster.discovery.NodeDiscoveryProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -39,11 +38,7 @@ public class AtomixNodeDiscoveryAutoConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @Bean(name = "atomix-k8s-discovery")
     public NodeDiscoveryProvider atomixK8sDiscovery(AtomixNodeDiscoveryConfiguration configuration) {
-        AtomixNodeDiscoveryProviderConfig config = new AtomixNodeDiscoveryProviderConfig();
-        config.setNamnespace(configuration.getNamespace());
-        config.setEndpointName(configuration.getEndpointName());
-        config.setPortName(configuration.getPortName());
-
-        return new AtomixNodeDiscoveryProvider(config);
+        // _<port>._<proto>.<service>.<ns>.svc.<zone>
+        return new AtomixNodeDiscoveryProvider(configuration);
     }
 }

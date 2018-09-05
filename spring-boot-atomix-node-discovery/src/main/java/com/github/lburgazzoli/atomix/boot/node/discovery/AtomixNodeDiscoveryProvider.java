@@ -16,12 +16,19 @@
  */
 package com.github.lburgazzoli.atomix.boot.node.discovery;
 
-import java.util.List;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.naming.NamingEnumeration;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 import com.google.common.collect.ImmutableSet;
 import io.atomix.cluster.BootstrapService;
@@ -32,15 +39,6 @@ import io.atomix.cluster.discovery.NodeDiscoveryEventListener;
 import io.atomix.cluster.discovery.NodeDiscoveryProvider;
 import io.atomix.utils.event.AbstractListenerManager;
 import io.atomix.utils.net.Address;
-import io.fabric8.kubernetes.api.model.EndpointAddress;
-import io.fabric8.kubernetes.api.model.EndpointPort;
-import io.fabric8.kubernetes.api.model.EndpointSubset;
-import io.fabric8.kubernetes.api.model.Endpoints;
-import io.fabric8.kubernetes.client.AutoAdaptableKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,29 +46,44 @@ public class AtomixNodeDiscoveryProvider
     extends AbstractListenerManager<NodeDiscoveryEvent, NodeDiscoveryEventListener>
     implements NodeDiscoveryProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AtomixNodeDiscoveryProvider.class);
-    public static final NodeDiscoveryProvider.Type TYPE = new AtomixNodeDiscoveryProviderType();
+    public static final NodeDiscoveryProvider.Type TYPE;
+
+    private static final Logger LOGGER;
+    private static final String[] ATTRIBUTE_IDS;
+    private static final Hashtable<String, String> ENV;
+
+    static {
+        TYPE = new AtomixNodeDiscoveryProviderType();
+
+        LOGGER = LoggerFactory.getLogger(AtomixNodeDiscoveryProvider.class);
+        ATTRIBUTE_IDS = new String[] {"SRV"};
+
+        ENV = new Hashtable<>();
+        ENV.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+        ENV.put("java.naming.provider.url", "dns:");
+    }
 
     private final AtomixNodeDiscoveryProviderConfig config;
     private final Map<Address, Node> nodes;
-    private final NamespacedKubernetesClient client;
     private final AtomicBoolean watching;
 
-    private Watch watch;
+    private ScheduledExecutorService scheduler;
     private BootstrapService bootstrap;
 
     public AtomixNodeDiscoveryProvider(AtomixNodeDiscoveryProviderConfig config) {
         this.config = config;
         this.nodes = new ConcurrentHashMap<>();
         this.watching = new AtomicBoolean();
-        this.client = new AutoAdaptableKubernetesClient();
     }
 
     @Override
     public Set<Node> getNodes() {
         LOGGER.info("============= getNodes ===============");
-        
-        watch();
+
+        if (watching.compareAndSet(false, true)) {
+            this.scheduler = Executors.newSingleThreadScheduledExecutor();
+            this.scheduler.scheduleAtFixedRate(this::watch, 0, 5, TimeUnit.SECONDS);
+        }
 
         return ImmutableSet.copyOf(nodes.values());
     }
@@ -82,7 +95,10 @@ public class AtomixNodeDiscoveryProvider
             this.bootstrap = bootstrap;
             post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, localNode));
 
-            watch();
+            if (watching.compareAndSet(false, true)) {
+                this.scheduler = Executors.newSingleThreadScheduledExecutor();
+                this.scheduler.scheduleAtFixedRate(this::watch, 0, 5, TimeUnit.SECONDS);
+            }
         }
 
         return CompletableFuture.completedFuture(null);
@@ -96,10 +112,8 @@ public class AtomixNodeDiscoveryProvider
             LOGGER.info("Left");
 
             if (watching.compareAndSet(true, false)) {
-                if (watch != null) {
-                    watch.close();
-                    watch = null;
-                }
+                this.scheduler.shutdownNow();
+                this.scheduler = null;
             }
         }
 
@@ -115,72 +129,54 @@ public class AtomixNodeDiscoveryProvider
     //
     // ************************
 
-    private void handle(Watcher.Action action, Endpoints resource) {
-        if (action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED) {
-            for (EndpointSubset subset : resource.getSubsets()) {
+    private void watch() {
+        String namespace = config.getNamespace() != null ? config.getNamespace() : System.getenv("KUBERNETES_NAMESPACE");
+        String portName = config.getPortName();
+        String portProtocol = config.getPortProtocol();
+        String zone = config.getZone();
+        String serviceName = config.getServiceName();
 
-                if (subset.getPorts().size() == 1) {
-                    addNode(subset.getPorts().get(0), subset);
-                } else {
-                    final List<EndpointPort> ports = subset.getPorts();
-                    final int portSize = ports.size();
+        // validation
+        Objects.nonNull(namespace);
+        Objects.nonNull(portName);
+        Objects.nonNull(portProtocol);
+        Objects.nonNull(zone);
 
-                    EndpointPort port;
-                    for (int p = 0; p < portSize; p++) {
-                        port = ports.get(p);
+        try {
 
-                        // todo: check port name
-                        addNode(port, subset);
+
+            final String query = String.format("_%s._%s.%s.%s.svc.%s",
+                portName,
+                portProtocol,
+                serviceName,
+                namespace,
+                zone
+            );
+
+            final DirContext ctx = new InitialDirContext(ENV);
+            final NamingEnumeration<?> resolved = ctx.getAttributes(query, ATTRIBUTE_IDS).get("srv").getAll();
+
+            if (resolved.hasMore()) {
+
+                while (resolved.hasMore()) {
+                    String record = (String)resolved.next();
+                    String[] items = record.split(" ", -1);
+                    String host = items[3].trim();
+                    String port = items[2].trim();
+
+                    Node node = Node.builder().withAddress(host, Integer.parseInt(port)).withId("").build();
+
+                    if (nodes.putIfAbsent(node.address(), node) == null) {
+                        LOGGER.info("Node added: {}", node);
+                        post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, node));
                     }
                 }
+            } else {
+                LOGGER.warn("Could not find any service for name={}, query={}", serviceName, query);
             }
-        } else {
-            for (Node node : nodes.values()) {
-                post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.LEAVE, node));
-            }
-
-            nodes.clear();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not resolve services via DNSSRV", e);
         }
     }
-
-    private void addNode(EndpointPort port, EndpointSubset subset) {
-        final List<EndpointAddress> addresses = subset.getAddresses();
-        final int size = addresses.size();
-
-        for (int i = 0; i < size; i++) {
-            EndpointAddress ea = addresses.get(0);
-            Address nodeAddress = Address.from(ea.getIp(), port.getPort());
-            Node node = Node.builder().withAddress(nodeAddress).withId(ea.getHostname()).build();
-
-            if (nodes.putIfAbsent(nodeAddress, node) == null) {
-                LOGGER.info("Node added: {}", node);
-                post(new NodeDiscoveryEvent(NodeDiscoveryEvent.Type.JOIN, node));
-            }
-        }
-    }
-
-    private void watch() {
-        if (watching.compareAndSet(false, true)) {
-            // subscribe to events
-            watch = client.endpoints().inNamespace(config.getNamnespace()).withName(config.getEndpointName()).watch(new Watcher<Endpoints>() {
-                @Override
-                public void eventReceived(Action action, Endpoints resource) {
-                    LOGGER.info("event: action:{}, resource={}", action, resource);
-                    handle(action, resource);
-                }
-
-                @Override
-                public void onClose(KubernetesClientException cause) {
-                    handle(Action.ERROR, null);
-                }
-            });
-        }
-
-        handle(
-            Watcher.Action.MODIFIED,
-            client.endpoints().inNamespace(config.getNamnespace()).withName(config.getEndpointName()).get()
-        );
-    }
-
 
 }

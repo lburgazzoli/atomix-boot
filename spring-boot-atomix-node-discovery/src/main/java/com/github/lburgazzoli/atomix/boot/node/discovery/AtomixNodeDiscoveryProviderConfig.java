@@ -23,24 +23,19 @@ import io.atomix.cluster.discovery.NodeDiscoveryProvider;
  * Discovery Config
  */
 public class AtomixNodeDiscoveryProviderConfig extends NodeDiscoveryConfig {
-    private String namnespace;
-    private String endpointName;
+    private String namespace;
     private String portName;
+    private String portProtocol;
+    private String zone;
+    private String domain;
+    private String serviceName;
 
-    public String getNamnespace() {
-        return namnespace;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setNamnespace(String namnespace) {
-        this.namnespace = namnespace;
-    }
-
-    public String getEndpointName() {
-        return endpointName;
-    }
-
-    public void setEndpointName(String endpointName) {
-        this.endpointName = endpointName;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public String getPortName() {
@@ -49,6 +44,30 @@ public class AtomixNodeDiscoveryProviderConfig extends NodeDiscoveryConfig {
 
     public void setPortName(String portName) {
         this.portName = portName;
+    }
+
+    public String getPortProtocol() {
+        return portProtocol;
+    }
+
+    public void setPortProtocol(String portProtocol) {
+        this.portProtocol = portProtocol;
+    }
+
+    public String getZone() {
+        return zone;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     @Override
