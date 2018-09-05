@@ -20,7 +20,7 @@ items:
     name: atomix
   spec:
     serviceName: "atomix"
-    replicas: 3
+    replicas: 1
     selector:
       matchLabels:
         app: atomix

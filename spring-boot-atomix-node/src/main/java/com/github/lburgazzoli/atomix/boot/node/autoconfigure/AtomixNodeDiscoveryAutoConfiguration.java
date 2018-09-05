@@ -17,7 +17,6 @@
 package com.github.lburgazzoli.atomix.boot.node.autoconfigure;
 
 import com.github.lburgazzoli.atomix.boot.autoconfigure.AtomixAutoConfiguration;
-import com.github.lburgazzoli.atomix.boot.autoconfigure.AtomixConfiguration;
 import io.atomix.cluster.discovery.NodeDiscoveryProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -31,7 +30,7 @@ import org.springframework.context.annotation.Scope;
 @AutoConfigureBefore(AtomixAutoConfiguration.class)
 @Configuration
 @ConditionalOnProperty(prefix = "atomix.discovery.k8s", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(AtomixConfiguration.class)
+@EnableConfigurationProperties(AtomixNodeDiscoveryConfiguration.class)
 public class AtomixNodeDiscoveryAutoConfiguration {
 
     @ConditionalOnMissingBean

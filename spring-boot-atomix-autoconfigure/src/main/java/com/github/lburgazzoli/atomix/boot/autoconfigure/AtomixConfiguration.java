@@ -97,8 +97,7 @@ public class AtomixConfiguration {
         /**
          * The member listening port.
          */
-        @NotNull
-        private Integer port;
+        private Integer port = 5679;
 
 
         public String getId() {
