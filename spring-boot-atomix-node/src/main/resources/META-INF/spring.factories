@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    com.github.lburgazzoli.atomix.boot.node.autoconfigure.AtomixNodeDiscoveryAutoConfiguration
+

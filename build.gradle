@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -10,7 +11,8 @@ buildscript {
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0"
         classpath "com.github.ben-manes:gradle-versions-plugin:0.17.0"
         classpath "gradle.plugin.io.github.ddimtirov:codacy-gradle-plugin:0.1.0"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE"
+        classpath "com.bmuschko:gradle-docker-plugin:3.6.1"
     }
 }
 
@@ -38,13 +40,15 @@ ext {
 
     versions = [
         slf4j               : '1.7.25',
-        snakeyaml           : '1.21',
+        snakeyaml           : '1.23',
         atomix              : '3.0.3',
         validation_api      : '2.0.1.Final',
         hibernate_validator : '6.0.9.Final',
         spring_boot         : '2.0.4.RELEASE',
         junit_jupiter       : '5.3.0',
         assertj             : '3.11.1',
+        k8s_client          : "4.0.4",
+        k8s_model           : "3.0.2"
     ]
 }
 
@@ -87,6 +91,7 @@ subprojects {
     dependencies {
         api "org.slf4j:slf4j-api:$versions.slf4j"
         api "javax.validation:validation-api:$versions.validation_api"
+        api "org.yaml:snakeyaml:$versions.snakeyaml"
 
         api "io.atomix:atomix:$versions.atomix"
         api "io.atomix:atomix-raft:$versions.atomix"

@@ -1,7 +1,10 @@
 rootProject.name = 'atomix-boot'
 
-// spring-boot
+// core
 include ':spring-boot-atomix'
 include ':spring-boot-atomix-autoconfigure'
 include ':spring-boot-atomix-dependencies'
 include ':spring-boot-starter-atomix'
+
+// k8s
+include ':spring-boot-atomix-node'
