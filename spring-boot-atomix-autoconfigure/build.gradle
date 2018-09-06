@@ -1,6 +1,4 @@
 
 dependencies {
-    api "io.fabric8:kubernetes-client:$versions.k8s_client"
-
     api project(':spring-boot-atomix')
 }

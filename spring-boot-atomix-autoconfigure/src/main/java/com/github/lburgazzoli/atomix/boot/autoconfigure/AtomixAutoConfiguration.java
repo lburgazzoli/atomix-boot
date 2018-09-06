@@ -17,6 +17,7 @@
 package com.github.lburgazzoli.atomix.boot.autoconfigure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,15 @@ import io.atomix.cluster.Node;
 import io.atomix.cluster.discovery.BootstrapDiscoveryProvider;
 import io.atomix.cluster.discovery.NodeDiscoveryProvider;
 import io.atomix.core.Atomix;
+import io.atomix.core.AtomixRegistry;
 import io.atomix.core.profile.Profile;
+import io.atomix.utils.NamedType;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -45,13 +50,14 @@ public class AtomixAutoConfiguration {
     @Bean(name = "atomix-instance", initMethod = "start", destroyMethod = "stop")
     public AtomixInstance atomix(
             AtomixConfiguration configuration,
+            AtomixRegistry registry,
             Optional<List<AtomixInstance.Listener>> listeners,
             NodeDiscoveryProvider discoveryProvider) {
 
         final String clusterId = configuration.getClusterId();
         final String memberId = configuration.getMember().getId();
 
-        final Atomix atomix = Atomix.builder(Thread.currentThread().getContextClassLoader())
+        final Atomix atomix = Atomix.builder(registry)
             .withClusterId(clusterId)
             .withMemberId(memberId)
             .withAddress(configuration.getMember().getHost(), configuration.getMember().getPort())
@@ -81,5 +87,30 @@ public class AtomixAutoConfiguration {
         }
 
         return BootstrapDiscoveryProvider.builder().withNodes(nodes).build();
+    }
+
+    @ConditionalOnMissingBean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @Bean(name = "atomix-registry")
+    public AtomixRegistry atomixRegistry(ApplicationContext context) {
+        return new AtomixRegistry() {
+            @Override
+            public <T extends NamedType> Collection<T> getTypes(Class<T> type) {
+                try {
+                    return context.getBeansOfType(type).values();
+                } catch (BeansException e) {
+                    return Collections.emptyList();
+                }
+            }
+
+            @Override
+            public <T extends NamedType> T getType(Class<T> type, String name) {
+                try {
+                    return context.getBean("atomix:" + name, type);
+                } catch (BeansException e) {
+                    return null;
+                }
+            }
+        };
     }
 }

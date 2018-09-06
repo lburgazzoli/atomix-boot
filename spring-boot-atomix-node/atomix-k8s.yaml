@@ -32,7 +32,7 @@ items:
       spec:
         containers:
         - name: atomix
-          image: lburgazzoli/atomix-boot:3.0.3
+          image: lburgazzoli/atomix-boot:3.0.5
           imagePullPolicy: Always
           ports:
           - containerPort: 5679
